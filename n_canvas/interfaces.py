@@ -2,6 +2,11 @@ import abc
 
 
 class IShape(abc.ABC):
+    @property
+    @abc.abstractmethod
+    def shape_name(self) -> str:
+        pass
+
     @abc.abstractmethod
     def set_x(self, x: int):
         pass

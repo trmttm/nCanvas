@@ -1,5 +1,7 @@
-from n_canvas.shapes.shape import Shape
+from .shape import Shape
 
 
 class Text(Shape):
-    pass
+    @property
+    def shape_name(self) -> str:
+        return 'text'
