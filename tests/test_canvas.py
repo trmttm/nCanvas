@@ -68,6 +68,7 @@ class MyTestCase(unittest.TestCase):
         canvas.show_history()
         self.assertEqual(len(canvas.get_history()), 4)  # Check history 01
         for state in (state_3, state_2, state_1, state_0):  # Check Undo and state
+            print()
             canvas.undo()
             self.assertEqual(canvas.state, state)
         self.assertEqual(len(canvas.get_history()), 0)  # Check history 02
