@@ -1,10 +1,9 @@
 import unittest
 
-from n_canvas.interactors.canvas import Canvas
-
 
 class MyTestCase(unittest.TestCase):
     def test_high_level_interface(self):
+        from n_canvas.interactors.canvas import Canvas
         canvas = Canvas()
 
         rectangle = canvas.add_rectangle()
@@ -40,6 +39,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(line.position, (6, 11))
 
     def test_undo_redo_state_io(self):
+        from n_canvas.interactors.canvas import Canvas
         state_0 = {'shapes': ()}
         state_1 = {'shapes': ({'x': 0, 'y': 0},)}
         state_2 = {'shapes': ({'x': 0, 'y': 0}, {'x': 0, 'y': 0},)}
@@ -72,6 +72,18 @@ class MyTestCase(unittest.TestCase):
             canvas.undo()
             self.assertEqual(canvas.state, state)
         self.assertEqual(len(canvas.get_history()), 0)  # Check history 02
+
+    def test_rectangle(self):
+        from n_canvas.interactors.canvas import Canvas
+        canvas = Canvas()
+        rectangle = canvas.add_rectangle(id='rectangle01')
+        rectangle.set_x(1)
+        rectangle.set_y(2)
+        rectangle.set_width(5)
+        rectangle.set_height(10)
+        canvas.backup()
+
+        self.assertEqual(canvas.state, {'shapes': ({'id': 'rectangle01', 'height': 10, 'width': 5, 'x': 1, 'y': 2},)})
 
 
 if __name__ == '__main__':

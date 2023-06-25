@@ -1,15 +1,16 @@
 from n_memento import Entity
 
+from n_canvas import constants as c
 from n_canvas.interfaces import IShape
 
 
 class Shape(IShape, Entity):
-    _key_x = 'x'
-    _key_y = 'y'
-    _key_id = 'id'
+    _key_id = c.ID
+    _key_x = c.X
+    _key_y = c.Y
 
     def __init__(self, **kwargs):
-        initial_state = {'x': 0, 'y': 0}
+        initial_state = {self._key_x: 0, self._key_y: 0}
         self.set_initial_state(initial_state, self._key_id, **kwargs)
         self.set_initial_state(initial_state, self._key_x, **kwargs)
         self.set_initial_state(initial_state, self._key_y, **kwargs)

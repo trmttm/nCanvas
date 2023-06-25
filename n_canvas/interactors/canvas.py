@@ -27,16 +27,16 @@ class Canvas(Entity):
         self.set('shapes', tuple(shape.state for shape in self._shapes))
         super().backup()
 
-    def add_rectangle(self) -> IShape:
-        new_shape = Rectangle()
+    def add_rectangle(self, **kwargs) -> Rectangle:
+        new_shape = Rectangle(**kwargs)
         self._shapes.append(new_shape)
         return new_shape
 
-    def add_text_box(self) -> IShape:
+    def add_text_box(self) -> TextBox:
         return TextBox()
 
-    def add_text(self) -> IShape:
+    def add_text(self) -> Text:
         return Text()
 
-    def add_line(self) -> IShape:
+    def add_line(self) -> Line:
         return Line()
