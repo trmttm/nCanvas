@@ -6,13 +6,19 @@ from n_canvas.interfaces import IShape
 class Shape(IShape, Entity):
     _key_x = 'x'
     _key_y = 'y'
+    _key_id = 'id'
 
-    def __init__(self):
-        initial_state = {
-            self._key_x: 0,
-            self._key_y: 0,
-        }
+    def __init__(self, **kwargs):
+        initial_state = {'x': 0, 'y': 0}
+        self.set_initial_state(initial_state, self._key_id, **kwargs)
+        self.set_initial_state(initial_state, self._key_x, **kwargs)
+        self.set_initial_state(initial_state, self._key_y, **kwargs)
+
         super().__init__(initial_state)
+
+    def set_initial_state(self, initial_state, key, **kwargs):
+        if kwargs.get(key):
+            initial_state.update({self._key_id: kwargs.get(key)})
 
     def set_x(self, x: int):
         self.set(self._key_x, x)
