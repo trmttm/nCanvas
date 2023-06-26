@@ -87,6 +87,14 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(rectangle.width, 5)
         self.assertEqual(rectangle.height, 10)
 
+    def test_text_box(self):
+        from n_canvas.shapes.text_box import TextBox
+        text_box = TextBox()
+        text_box.width = 10
+        text_box.font = 'Times New Roman'
+        self.assertEqual(text_box.font, 'Times New Roman')
+        self.assertEqual(text_box.width, 10)
+
 
 if __name__ == '__main__':
     unittest.main()

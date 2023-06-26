@@ -7,6 +7,8 @@ class Rectangle(Shape):
     width = ShapeProperty()
     height = ShapeProperty()
     border_color = ShapeProperty()
+    fill_color = ShapeProperty()
+    border_width = ShapeProperty()
 
     @property
     def shape_name(self) -> str:

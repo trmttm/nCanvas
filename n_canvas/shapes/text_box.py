@@ -1,8 +1,9 @@
 from n_canvas import constants as c
-from n_canvas.shapes.shape import Shape
+from .rectangle import Rectangle
+from .text import Text
 
 
-class TextBox(Shape):
+class TextBox(Rectangle, Text):
     @property
     def shape_name(self) -> str:
         return c.TEXT_BOX
