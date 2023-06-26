@@ -1,10 +1,3 @@
-ID = 'id'
-X = 'x'
-Y = 'y'
-WIDTH = 'width'
-HEIGHT = 'height'
-COLOR_BORDER = 'border_color'
-
 RECTANGLE = 'rectangle'
 LINE = 'line'
 TEXT = 'text'

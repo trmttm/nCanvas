@@ -11,7 +11,8 @@ class Shape(IShape, Entity):
 
     def __init__(self, **kwargs):
         super().__init__()
-        if 'id' in kwargs:  # This must be below instantiation of super
+
+        if 'id' in kwargs:
             self.id = kwargs.get('id')
 
     def set_position(self, x: int, y: int):
