@@ -11,19 +11,19 @@ class MyTestCase(unittest.TestCase):
         text = canvas.add_text()
         line = canvas.add_line()
 
-        rectangle.set_x(5)
-        text_box.set_x(5)
-        text.set_x(5)
-        line.set_x(5)
+        rectangle.x = 5
+        text_box.x = 5
+        text.x = 5
+        line.x = 5
         self.assertEqual(rectangle.x, 5)
         self.assertEqual(text_box.x, 5)
         self.assertEqual(text.x, 5)
         self.assertEqual(line.x, 5)
 
-        rectangle.set_y(10)
-        text_box.set_y(10)
-        text.set_y(10)
-        line.set_y(10)
+        rectangle.y = 10
+        text_box.y = 10
+        text.y = 10
+        line.y = 10
         self.assertEqual(rectangle.y, 10)
         self.assertEqual(text_box.y, 10)
         self.assertEqual(text.y, 10)
@@ -61,7 +61,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(canvas.state, state_2)
 
         # State 3
-        rectangle.set_x(1)
+        rectangle.x = 1
         canvas.backup()
         self.assertEqual(canvas.state, state_3)
 
@@ -77,8 +77,8 @@ class MyTestCase(unittest.TestCase):
         from n_canvas.interactors.canvas import Canvas
         canvas = Canvas()
         rectangle = canvas.add_rectangle(id='rectangle01')
-        rectangle.set_x(1)
-        rectangle.set_y(2)
+        rectangle.x = 1
+        rectangle.y = 2
         rectangle.width = 5
         rectangle.height = 10
         canvas.backup()

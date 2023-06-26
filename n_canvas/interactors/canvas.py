@@ -28,15 +28,18 @@ class Canvas(Entity):
         super().backup()
 
     def add_rectangle(self, **kwargs) -> Rectangle:
-        new_shape = Rectangle(**kwargs)
+        return self.create_a_shape(Rectangle, **kwargs)
+
+    def add_text_box(self, **kwargs) -> TextBox:
+        return self.create_a_shape(TextBox, **kwargs)
+
+    def add_text(self, **kwargs) -> Text:
+        return self.create_a_shape(Text, **kwargs)
+
+    def add_line(self, **kwargs) -> Line:
+        return self.create_a_shape(Line, **kwargs)
+
+    def create_a_shape(self, shape_class, **kwargs):
+        new_shape = shape_class(**kwargs)
         self._shapes.append(new_shape)
         return new_shape
-
-    def add_text_box(self) -> TextBox:
-        return TextBox()
-
-    def add_text(self) -> Text:
-        return Text()
-
-    def add_line(self) -> Line:
-        return Line()
