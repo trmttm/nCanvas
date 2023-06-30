@@ -2,6 +2,7 @@ from typing import Union
 
 from n_memento import Entity
 
+from n_canvas import constants as c
 from n_canvas.interfaces import IShape
 from n_canvas.shapes.line import Line
 from n_canvas.shapes.rectangle import Rectangle
@@ -15,6 +16,9 @@ class Canvas(Entity):
         super().__init__()
         self._shapes: list[Union[IShape, Entity]] = []
         self.backup()
+        self._subscribers: dict[[str], list] = {
+            c.DRAW_RECTANGLE: []
+        }
 
     def undo(self):
         for shape in self._shapes:
@@ -43,3 +47,20 @@ class Canvas(Entity):
         new_shape = shape_class(**kwargs)
         self._shapes.append(new_shape)
         return new_shape
+
+    def subscribe(self, key: str, subscriber):
+        if key in self._subscribers:
+            if subscriber not in self._subscribers.get(key):
+                self._subscribers.get(key).append(subscriber)
+
+    def draw_rectangle(self, rectangle: Rectangle):
+        self._notify(c.DRAW_RECTANGLE, **rectangle.state)
+
+    @staticmethod
+    def set_position(shape: IShape, x: int, y: int):
+        shape.set_position(x, y)
+
+    def _notify(self, key, **kwargs):
+        if key in self._subscribers:
+            for subscriber in self._subscribers.get(key):
+                subscriber(**kwargs)

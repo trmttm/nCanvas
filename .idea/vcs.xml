@@ -2,6 +2,11 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/venv/src/gui-builder" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/venv/src/interface" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/venv/src/is-identifier" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/venv/src/nmemento" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/venv/src/os-identifier" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/venv/src/view-tkinter" vcs="Git" />
   </component>
 </project>

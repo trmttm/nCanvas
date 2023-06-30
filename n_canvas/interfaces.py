@@ -6,3 +6,7 @@ class IShape(abc.ABC):
     @abc.abstractmethod
     def shape_name(self) -> str:
         pass
+
+    @abc.abstractmethod
+    def set_position(self, x: int, y: int):
+        pass
