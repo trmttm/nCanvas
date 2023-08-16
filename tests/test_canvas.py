@@ -1,35 +1,6 @@
-import tkinter as tk
 import unittest
 
-
-# lowest level detail
-def draw_rectangle(canvas_: tk.Canvas, **rectangle_state):
-    if rectangle_exists(canvas_, **rectangle_state):
-        add_new_rectangle(canvas_, **rectangle_state)
-    else:
-        move_rectangle(canvas_, **rectangle_state)
-
-
-def add_new_rectangle(canvas_: tk.Canvas, **rectangle_state):
-    rectangle_id = rectangle_state.get('id')
-    x1, y1 = rectangle_state.get('x'), rectangle_state.get('y')
-    width, height = rectangle_state.get('width'), rectangle_state.get('height')
-    x2, y2 = x1 + width, y1 + height
-    canvas_.create_rectangle(x1, y1, x2, y2, tags=(rectangle_id,))
-
-
-def move_rectangle(canvas_: tk.Canvas, **rectangle_state):
-    rectangle_id = rectangle_state.get('id')
-    x_current, y_current = canvas_.coords(rectangle_id)[:2]
-    x, y = rectangle_state.get('x'), rectangle_state.get('y')
-    delta_x, delta_y = x - x_current, y - y_current
-    canvas_.move(rectangle_id, delta_x, delta_y)
-
-
-def rectangle_exists(canvas_: tk.Canvas, **rectangle_state) -> bool:
-    rectangle_id = rectangle_state.get('id')
-    rectangle_exists_ = not canvas_.find_withtag(rectangle_id)
-    return rectangle_exists_
+from gui.canvas.custom_canvas import create_custom_canvas
 
 
 class MyTestCase(unittest.TestCase):
@@ -181,15 +152,82 @@ class MyTestCase(unittest.TestCase):
 
         parent.grid_rowconfigure(0, weight=1)
         parent.grid_columnconfigure(0, weight=1)
-        canvas = tk.Canvas(parent)
-        canvas.grid(row=0, column=0, sticky='nsew')
+
+        canvas = create_custom_canvas(parent)
+        canvas.mouse_handler.mouse_in = lambda x, y: print('Mouse In', x, y)
+        canvas.mouse_handler.mouse_out = lambda x, y: print('Mouse Out', x, y)
+
+        canvas.mouse_handler.left_click = lambda x, y: print('Left Click', x, y)
+        canvas.mouse_handler.left_click_motion = lambda x, y: print('Left Click Drag', x, y)
+        canvas.mouse_handler.left_click_release = lambda x, y: print('Left Click Release', x, y)
+
+        canvas.mouse_handler.right_click = lambda x, y: print('Right Click', x, y)
+        canvas.mouse_handler.right_click_motion = lambda x, y: print('Right Click Drag', x, y)
+        canvas.mouse_handler.right_click_release = lambda x, y: print('Right Click Release', x, y)
+
+        canvas.mouse_handler.middle_click = lambda x, y: print('Middle Click', x, y)
+        canvas.mouse_handler.middle_click_motion = lambda x, y: print('Middle Click Drag', x, y)
+        canvas.mouse_handler.middle_click_release = lambda x, y: print('Middle Click Release', x, y)
+
+        # Shift
+        canvas.mouse_handler.left_click_shift = lambda x, y: print('SHIFT Left Click', x, y)
+        canvas.mouse_handler.left_click_motion_shift = lambda x, y: print('SHIFT Left Click Drag', x, y)
+        canvas.mouse_handler.left_click_release_shift = lambda x, y: print('SHIFT Left Click Release', x, y)
+
+        canvas.mouse_handler.right_click_shift = lambda x, y: print('SHIFT Right Click', x, y)
+        canvas.mouse_handler.right_click_motion_shift = lambda x, y: print('SHIFT Right Click Drag', x, y)
+        canvas.mouse_handler.right_click_release_shift = lambda x, y: print('SHIFT Right Click Release', x, y)
+
+        canvas.mouse_handler.middle_click_shift = lambda x, y: print('SHIFT Middle Click', x, y)
+        canvas.mouse_handler.middle_click_motion_shift = lambda x, y: print('SHIFT Middle Click Drag', x, y)
+        canvas.mouse_handler.middle_click_release_shift = lambda x, y: print('SHIFT Middle Click Release', x, y)
+
+        # Control
+        canvas.mouse_handler.left_click_control = lambda x, y: print('CONTROL Left Click', x, y)
+        canvas.mouse_handler.left_click_motion_control = lambda x, y: print('CONTROL Left Click Drag', x, y)
+        canvas.mouse_handler.left_click_release_control = lambda x, y: print('CONTROL Left Click Release', x, y)
+
+        canvas.mouse_handler.right_click_control = lambda x, y: print('CONTROL Right Click', x, y)
+        canvas.mouse_handler.right_click_motion_control = lambda x, y: print('CONTROL Right Click Drag', x, y)
+        canvas.mouse_handler.right_click_release_control = lambda x, y: print('CONTROL Right Click Release', x, y)
+
+        canvas.mouse_handler.middle_click_control = lambda x, y: print('CONTROL Middle Click', x, y)
+        canvas.mouse_handler.middle_click_motion_control = lambda x, y: print('CONTROL Middle Click Drag', x, y)
+        canvas.mouse_handler.middle_click_release_control = lambda x, y: print('CONTROL Middle Click Release', x, y)
+
+        # Command
+        canvas.mouse_handler.left_click_command = lambda x, y: print('COMMAND Left Click', x, y)
+        canvas.mouse_handler.left_click_motion_command = lambda x, y: print('COMMAND Left Click Drag', x, y)
+        canvas.mouse_handler.left_click_release_command = lambda x, y: print('COMMAND Left Click Release', x, y)
+
+        canvas.mouse_handler.right_click_command = lambda x, y: print('COMMAND Right Click', x, y)
+        canvas.mouse_handler.right_click_motion_command = lambda x, y: print('COMMAND Right Click Drag', x, y)
+        canvas.mouse_handler.right_click_release_command = lambda x, y: print('COMMAND Right Click Release', x, y)
+
+        canvas.mouse_handler.middle_click_command = lambda x, y: print('COMMAND Middle Click', x, y)
+        canvas.mouse_handler.middle_click_motion_command = lambda x, y: print('COMMAND Middle Click Drag', x, y)
+        canvas.mouse_handler.middle_click_release_command = lambda x, y: print('COMMAND Middle Click Release', x, y)
+
+        # Alt
+        canvas.mouse_handler.left_click_alt = lambda x, y: print('Alt Left Click', x, y)
+        canvas.mouse_handler.left_click_motion_alt = lambda x, y: print('Alt Left Click Drag', x, y)
+        canvas.mouse_handler.left_click_release_alt = lambda x, y: print('Alt Left Click Release', x, y)
+
+        canvas.mouse_handler.right_click_alt = lambda x, y: print('Alt Right Click', x, y)
+        canvas.mouse_handler.right_click_motion_alt = lambda x, y: print('Alt Right Click Drag', x, y)
+        canvas.mouse_handler.right_click_release_alt = lambda x, y: print('Alt Right Click Release', x, y)
+
+        canvas.mouse_handler.middle_click_alt = lambda x, y: print('Alt Middle Click', x, y)
+        canvas.mouse_handler.middle_click_motion_alt = lambda x, y: print('Alt Middle Click Drag', x, y)
+        canvas.mouse_handler.middle_click_release_alt = lambda x, y: print('Alt Middle Click Release', x, y)
 
         # [Define object interaction]###########################################################
         from n_canvas import constants as c
+        from gui.canvas.rectangle.draw_rectangle import draw_rectangle
         n_canvas.subscribe(c.DRAW_RECTANGLE, lambda **data: draw_rectangle(canvas, **data))
 
         # [Bind commands]###########################################################
-        def move_and_draw(x, y):
+        def move_and_draw(x: int, y: int):
             n_canvas.set_position(rectangle, rectangle.x + x, rectangle.y + y)
             n_canvas.draw_rectangle(rectangle)
 
