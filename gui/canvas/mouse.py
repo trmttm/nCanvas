@@ -13,6 +13,7 @@ tk_alt = 'Alt'
 
 class MouseHandler:
     mouse_in = Command()
+    mouse_motion = Command()
     mouse_out = Command()
 
     left_click = Command()
@@ -255,3 +256,4 @@ class MouseHandler:
     def _bind_enter_leave(self, widget):
         widget.bind('<Enter>', lambda e: self.mouse_in(*widget.get_xy(e)))
         widget.bind('<Leave>', lambda e: self.mouse_out(*widget.get_xy(e)))
+        widget.bind("<Motion>", lambda e: self.mouse_motion(e))

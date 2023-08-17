@@ -153,8 +153,19 @@ class MyTestCase(unittest.TestCase):
         parent.grid_columnconfigure(0, weight=1)
 
         canvas = create_custom_canvas(parent)
+
+        def get_shape_under_mouse(e):
+            try:
+                key = e.widget.itemconfigure('current')['tags'][-1].split(' ')[0]
+                print(key, ' is under mouse.')
+            except KeyError:
+                key = None
+
+        # [Canvas and Mouse actions]###########################################################
         canvas.mouse_handler.mouse_in = lambda x, y: print('Mouse In', x, y)
         canvas.mouse_handler.mouse_out = lambda x, y: print('Mouse Out', x, y)
+        # canvas.mouse_handler.mouse_motion = lambda x, y: print('Mouse Motion At', x, y)
+        canvas.mouse_handler.mouse_motion = get_shape_under_mouse
 
         canvas.mouse_handler.left_click = lambda x, y: print('Left Click', x, y)
         canvas.mouse_handler.left_click_motion = lambda x, y: print('Left Click Drag', x, y)
@@ -233,7 +244,7 @@ class MyTestCase(unittest.TestCase):
         n_canvas.subscribe(c.SET_RECTANGLE_FILL_COLOR, lambda **data: fill(canvas, **data))
         n_canvas.subscribe(c.SET_RECTANGLE_BORDER_WIDTH, lambda **data: set_border_width(canvas, **data))
 
-        # [Bind commands]###########################################################
+        # [Define commands]###########################################################
 
         def change_canvas_color(c: tk.Canvas, color):
             c.configure(bg=color)
