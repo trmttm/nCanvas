@@ -52,13 +52,23 @@ class Canvas(Entity):
         if key in self._subscribers:
             if subscriber not in self._subscribers.get(key):
                 self._subscribers.get(key).append(subscriber)
+        else:
+            self._subscribers[key] = [subscriber]
 
     def draw_rectangle(self, rectangle: Rectangle):
         self._notify(c.DRAW_RECTANGLE, **rectangle.state)
 
-    @staticmethod
-    def set_position(shape: IShape, x: int, y: int):
-        shape.set_position(x, y)
+    def set_rectangle_width(self, rectangle: Rectangle):
+        self._notify(c.SET_RECTANGLE_WIDTH, **rectangle.state)
+
+    def set_rectangle_border_color(self, rectangle: Rectangle):
+        self._notify(c.SET_RECTANGLE_BORDER_COLOR, **rectangle.state)
+
+    def set_rectangle_fill_color(self, rectangle: Rectangle):
+        self._notify(c.SET_RECTANGLE_FILL_COLOR, **rectangle.state)
+
+    def set_rectangle_border_width(self, rectangle: Rectangle):
+        self._notify(c.SET_RECTANGLE_BORDER_WIDTH, **rectangle.state)
 
     def _notify(self, key, **kwargs):
         if key in self._subscribers:

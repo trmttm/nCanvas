@@ -121,13 +121,19 @@ class MyTestCase(unittest.TestCase):
         def change_canvas_color(c: tk.Canvas, color):
             c.configure(bg=color)
 
+        def set_canvas_border_color(c: tk.Canvas, color):
+            c.config(highlightbackground=color)
+
         buttons = {
             'btn_01': 'Canvas Color',
             'btn_02': 'Draw Rect',
-            'btn_03': 'Move Rect X',
-            'btn_04': 'Move Rect Y',
-            'btn_05': 'Move Rect X and Draw',
-            'btn_06': 'Move Rect Y and Draw',
+            'btn_03': 'Move Rect X and Draw',
+            'btn_04': 'Move Rect Y and Draw',
+            'btn_05': '+ Width',
+            'btn_06': 'Border color red',
+            'btn_07': 'Canvas border color blue',
+            'btn_08': 'Fill rectangle with yellow',
+            'btn_09': '+ Border width',
         }
         widgets: dict[[str], tk.Widget] = {}
 
@@ -223,23 +229,54 @@ class MyTestCase(unittest.TestCase):
 
         # [Define object interaction]###########################################################
         from n_canvas import constants as c
-        from gui.canvas.rectangle.draw_rectangle import draw_rectangle
-        n_canvas.subscribe(c.DRAW_RECTANGLE, lambda **data: draw_rectangle(canvas, **data))
+        from gui.canvas.rectangle.draw_rectangle import move_or_draw_rectangle
+        from gui.canvas.rectangle.set_properties import set_border_color
+        from gui.canvas.rectangle.set_properties import fill
+        from gui.canvas.rectangle.set_properties import set_border_width
+        from gui.canvas.rectangle.set_properties import set_rectangle_width
+        n_canvas.subscribe(c.DRAW_RECTANGLE, lambda **data: move_or_draw_rectangle(canvas, **data))
+        n_canvas.subscribe(c.SET_RECTANGLE_WIDTH, lambda **data: set_rectangle_width(canvas, **data))
+        n_canvas.subscribe(c.SET_RECTANGLE_BORDER_COLOR, lambda **data: set_border_color(canvas, **data))
+        n_canvas.subscribe(c.SET_RECTANGLE_FILL_COLOR, lambda **data: fill(canvas, **data))
+        n_canvas.subscribe(c.SET_RECTANGLE_BORDER_WIDTH, lambda **data: set_border_width(canvas, **data))
 
         # [Bind commands]###########################################################
         def move_and_draw(x: int, y: int):
-            n_canvas.set_position(rectangle, rectangle.x + x, rectangle.y + y)
+            rectangle.x += x
+            rectangle.y += y
             n_canvas.draw_rectangle(rectangle)
+
+        def add_width(width: int):
+            rectangle.width += width
+            n_canvas.set_rectangle_width(rectangle)
+
+        def change_border_color(color: str):
+            rectangle.border_color = color
+            n_canvas.set_rectangle_border_color(rectangle)
+
+        def fill_rectangle_with(color: str):
+            rectangle.fill_color = color
+            n_canvas.set_rectangle_fill_color(rectangle)
+
+        def add_rectangle_border_width(width: int):
+            rectangle.border_width += width
+            n_canvas.set_rectangle_border_width(rectangle)
 
         widgets.get('btn_01').configure(command=lambda: change_canvas_color(canvas, 'light yellow'))
         widgets.get('btn_02').configure(command=lambda: n_canvas.draw_rectangle(rectangle))
-        widgets.get('btn_03').configure(command=lambda: n_canvas.set_position(rectangle, rectangle.x + 10, rectangle.y))
-        widgets.get('btn_04').configure(command=lambda: n_canvas.set_position(rectangle, rectangle.x, rectangle.y + 10))
-        widgets.get('btn_05').configure(command=lambda: move_and_draw(10, 0))
-        widgets.get('btn_06').configure(command=lambda: move_and_draw(0, 10))
+        widgets.get('btn_03').configure(command=lambda: move_and_draw(10, 0))
+        widgets.get('btn_04').configure(command=lambda: move_and_draw(0, 10))
+        widgets.get('btn_05').configure(command=lambda: add_width(10))
+        widgets.get('btn_06').configure(command=lambda: change_border_color('red'))
+        widgets.get('btn_07').configure(command=lambda: set_canvas_border_color(canvas, 'blue'))
+        widgets.get('btn_08').configure(command=lambda: fill_rectangle_with('yellow'))
+        widgets.get('btn_09').configure(command=lambda: add_rectangle_border_width(1))
 
         # [Launch App]###########################################################
         root.mainloop()
+
+    def test_abstract_out_and_define_architecture(self):
+        pass
 
 
 if __name__ == '__main__':
