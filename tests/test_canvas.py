@@ -160,9 +160,25 @@ class MyTestCase(unittest.TestCase):
             event: tk.Event = kwargs.get('event', None)
             x: int = kwargs.get('x', None)
             y: int = kwargs.get('y', None)
-            shape_under_mouse = kwargs.get('shape_under_mouse', None)
+            shape_id_under_mouse = kwargs.get('shape_under_mouse', None)
 
-            print(f'{event} at x={x}, y={y}, shape_under_mouse={shape_under_mouse}')
+            # implement below based on each App's needs
+            print(f'{event} at x={x}, y={y}, shape_id_under_mouse={shape_id_under_mouse}')
+
+            if event == c.Mouse_Motion_At and shape_id_under_mouse:
+                shape_under_mouse = n_canvas.get_rectangle_by_id(shape_id_under_mouse)
+                n_canvas.set_shape_under_mouse(shape_id_under_mouse)
+
+                shape_under_mouse.fill_color = 'yellow'
+                n_canvas.set_rectangle_fill_color(shape_under_mouse)
+
+            elif event == c.Mouse_Motion_At and shape_id_under_mouse is None:
+                uncleared_shape_id = n_canvas.get_shape_under_mouse()
+                if uncleared_shape_id is not None:
+                    n_canvas.clear_shape_under_mouse()
+                    shape_to_clear = n_canvas.get_shape_by_id(uncleared_shape_id)
+                    shape_to_clear.fill_color = 'pink'
+                    n_canvas.set_rectangle_fill_color(shape_to_clear)
 
         # [Canvas and Mouse actions]###########################################################
         mouse_handler = canvas.mouse_handler

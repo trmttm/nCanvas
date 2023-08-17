@@ -31,6 +31,11 @@ class Canvas(Entity):
         self.set(c.SHAPES, tuple(shape.state for shape in self._shapes))
         super().backup()
 
+    def get_shape_by_id(self, shape_id: str) -> IShape:
+        for shape in self._shapes:
+            if shape.id == shape_id:
+                return shape
+
     def add_rectangle(self, **kwargs) -> Rectangle:
         return self.create_a_shape(Rectangle, **kwargs)
 
@@ -58,8 +63,14 @@ class Canvas(Entity):
     def set_shape_under_mouse(self, shape_id: str):
         self.set(c.SHAPE_UNDER_MOUSE, shape_id)
 
+    def clear_shape_under_mouse(self):
+        self.set(c.SHAPE_UNDER_MOUSE, None)
+
     def get_shape_under_mouse(self) -> str:
         return self.get(c.SHAPE_UNDER_MOUSE)
+
+    def get_rectangle_by_id(self, shape_id) -> Rectangle:
+        return self.get_shape_by_id(shape_id)
 
     def draw_rectangle(self, rectangle: Rectangle):
         self._notify(c.DRAW_RECTANGLE, **rectangle.state)

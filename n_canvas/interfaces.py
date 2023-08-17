@@ -10,3 +10,8 @@ class IShape(abc.ABC):
     @abc.abstractmethod
     def set_position(self, x: int, y: int):
         pass
+
+    @property
+    @abc.abstractmethod
+    def id(self) -> str:
+        pass
