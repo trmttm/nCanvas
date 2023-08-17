@@ -15,6 +15,15 @@ class MouseInteractor:
     def clear_shape_under_mouse(self):
         self._set(c.SHAPE_UNDER_MOUSE, None)
 
+    def set_previous_position(self, x: int, y: int):
+        self._set(c.PREVIOUS_POSITION, (x, y))
+
+    def get_previous_position(self) -> str:
+        return self._get(c.PREVIOUS_POSITION)
+
+    def clear_previous_position(self):
+        self._set(c.PREVIOUS_POSITION, None)
+
     def set_clicked_position(self, x: int, y: int):
         self._set(c.CLICKED_POSITION, (x, y))
 
@@ -23,3 +32,12 @@ class MouseInteractor:
 
     def clear_clicked_position(self):
         self._set(c.CLICKED_POSITION, None)
+
+    def turn_on_dragging_mode(self):
+        self._set(c.DRAGGING_MODE, True)
+
+    def turn_off_dragging_mode(self):
+        self._set(c.DRAGGING_MODE, False)
+
+    def is_dragging_mode(self) -> bool:
+        return self._get(c.DRAGGING_MODE)

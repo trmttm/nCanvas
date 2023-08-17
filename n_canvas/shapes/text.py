@@ -12,3 +12,6 @@ class Text(Shape):
     @property
     def shape_name(self) -> str:
         return c.TEXT
+
+    def is_within_coordinates(self, x1: int, y1: int, x2: int, y2: int) -> bool:
+        return False

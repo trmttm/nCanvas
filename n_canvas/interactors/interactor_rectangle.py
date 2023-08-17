@@ -1,4 +1,5 @@
 from n_canvas import constants as c
+from n_canvas.interfaces import IShape
 from n_canvas.shapes.rectangle import Rectangle
 
 
@@ -9,13 +10,18 @@ class RectangleInteractor:
         self._get_any_shape_by_id = get_any_shape_by_id
         self._notify = notify
 
+    @staticmethod
+    def is_rectangle(shape: IShape) -> bool:
+        return shape.shape_name == c.RECTANGLE
+
     def add_new_shape(self, **kwargs) -> Rectangle:
         return self._create_a_shape(Rectangle, **kwargs)
 
     def get_shape_by_id(self, shape_id: str) -> Rectangle:
         shape = self._get_any_shape_by_id(shape_id)
-        if shape.shape_name == self._shape_type:
-            return shape
+        if shape is not None:
+            if shape.shape_name == self._shape_type:
+                return shape
 
     def draw(self, rectangle: Rectangle):
         self._notify(c.DRAW_RECTANGLE, **rectangle.state)

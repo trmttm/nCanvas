@@ -1,8 +1,9 @@
 import tkinter as tk
 
 from gui.canvas.interface import ICustomCanvas
-from .mouse import MouseHandler
 from n_canvas import constants as c
+from .mouse import MouseHandler
+
 tk_shift = 'Shift'
 tk_control = 'Control'
 tk_command = 'Command'
@@ -31,6 +32,9 @@ class CustomCanvas(ICustomCanvas, tk.Canvas):
         except KeyError:
             shape_under_mouse = None
         return {c.X: self.canvasx(e.x), c.Y: self.canvasy(e.y), c.SHAPE_UNDER_MOUSE: shape_under_mouse}
+
+    def erase_shape(self, **kwargs):
+        self.delete(kwargs.get('id'))
 
 
 def create_custom_canvas(parent) -> CustomCanvas:

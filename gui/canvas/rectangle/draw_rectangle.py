@@ -1,6 +1,7 @@
 import tkinter as tk
 
 from .set_properties import set_rectangle_fill_border_color_and_border_width
+from .set_properties import set_rectangle_width_height
 from .utility import get_rectangle_coords
 from .utility import rectangle_exists
 
@@ -25,3 +26,4 @@ def move_rectangle(canvas_: tk.Canvas, **rectangle_state):
     x, y = rectangle_state.get('x'), rectangle_state.get('y')
     delta_x, delta_y = x - x_current, y - y_current
     canvas_.move(rectangle_id, delta_x, delta_y)
+    set_rectangle_width_height(canvas_, **rectangle_state)

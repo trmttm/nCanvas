@@ -51,6 +51,12 @@ class Canvas(Entity):
         self._shapes[new_shape.id] = new_shape
         return new_shape
 
+    def erase_shape(self, **shape_state):
+        self._notify(c.ERASE_SHAPE, **shape_state)
+
+    def get_all_shapes(self) -> tuple[Union[IShape, Entity], ...]:
+        return tuple(self._shapes.values())
+
     def subscribe(self, key: str, subscriber):
         if key in self._subscribers:
             if subscriber not in self._subscribers.get(key):

@@ -3,7 +3,7 @@ import tkinter as tk
 from .utility import get_rectangle_coords
 
 
-def set_rectangle_width(canvas_: tk.Canvas, **rectangle_state):
+def set_rectangle_width_height(canvas_: tk.Canvas, **rectangle_state):
     rectangle_id = rectangle_state.get('id')
     x0, y0, x1, y1 = get_rectangle_coords(rectangle_state)
     canvas_.coords(rectangle_id, x0, y0, x1, y1)

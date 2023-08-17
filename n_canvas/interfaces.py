@@ -15,3 +15,7 @@ class IShape(abc.ABC):
     @abc.abstractmethod
     def id(self) -> str:
         pass
+
+    @abc.abstractmethod
+    def is_within_coordinates(self, x1: int, y1: int, x2: int, y2: int) -> bool:
+        pass

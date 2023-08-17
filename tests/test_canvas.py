@@ -1,7 +1,5 @@
 import unittest
 
-from gui.canvas.custom_canvas import create_custom_canvas
-
 
 class MyTestCase(unittest.TestCase):
     def test_high_level_interface(self):
@@ -121,9 +119,9 @@ class MyTestCase(unittest.TestCase):
         widgets: dict[[str], tk.Widget] = {}
 
         # [Place widgets]###########################################################
+        from gui.canvas.custom_canvas import create_custom_canvas
         root = tk.Tk()
         root.grid_rowconfigure(0, weight=1)
-        root.grid_columnconfigure(0, weight=1)
         root.grid_columnconfigure(1, weight=1)
 
         frame_controller = ttk.Frame(root)
@@ -166,9 +164,70 @@ class MyTestCase(unittest.TestCase):
             shape_id_under_mouse = kwargs.get(c.SHAPE_UNDER_MOUSE, None)
 
             # implement below based on each App's needs
-            print(f'{event} at x={x}, y={y}, shape_id_under_mouse={shape_id_under_mouse}')
+            # print(f'{event} at x={x}, y={y}, shape_id_under_mouse={shape_id_under_mouse}')
+
+            def clear_selections():
+                for shape_id_ in n_canvas.selection_interactor.get_shapes_selected():
+                    shape_ = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_)
+                    shape_.fill_color = 'pink'
+                    n_canvas.rectangle_interactor.set_fill_color(shape_)
+                n_canvas.selection_interactor.clear_shapes_selected()
+
+            def clear_shape_under_mouse():
+                uncleared_shape_id = n_canvas.mouse_interactor.get_shape_under_mouse()
+                if uncleared_shape_id is not None:
+                    n_canvas.mouse_interactor.clear_shape_under_mouse()
+                    shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
+
+                    if uncleared_shape_id not in n_canvas.selection_interactor.get_shapes_selected():
+                        shape_to_clear.fill_color = 'pink'
+                        n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
+
+            def drag_shapes(shape_ids, x, y):
+                x0, y0 = n_canvas.mouse_interactor.get_previous_position()
+                delta_x = x - x0
+                delta_y = y - y0
+                for shape_id in shape_ids:
+                    shape_selected = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
+                    shape_selected.x += delta_x
+                    shape_selected.y += delta_y
+                    n_canvas.rectangle_interactor.draw(shape_selected)
+
+            def draw_shape_selector(x, y):
+                x0, y0 = n_canvas.mouse_interactor.get_clicked_position()
+                delta_x = x - x0
+                delta_y = y - y0
+                shape_selector_options = {
+                    'id': c.SHAPE_SELECTOR,
+                    'fill_color': None,
+                    'border_color': 'black',
+                    'x': x0,
+                    'y': y0,
+                    'width': delta_x,
+                    'height': delta_y,
+                    'border_width': 1,
+                }
+                add_new_rectangle(**shape_selector_options)
+
+            def select_shapes(shape_ids: list):
+                n_canvas.selection_interactor.select_shapes(shape_ids)
+                for shape_id in n_canvas.selection_interactor.get_shapes_selected():
+                    shape = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
+                    shape.fill_color = 'orange'
+                    n_canvas.rectangle_interactor.set_fill_color(shape)
+
+            def get_shape_ids_in_selector(x, y):
+                x1, y1 = n_canvas.mouse_interactor.get_clicked_position()
+                x2, y2 = x, y
+                shape_ids_in_selector = []
+                for shape in n_canvas.get_all_shapes():
+                    if shape.is_within_coordinates(x1, y1, x2, y2) and shape.id != c.SHAPE_SELECTOR:
+                        shape_ids_in_selector.append(shape.id)
+                return shape_ids_in_selector
 
             if event == c.Mouse_Motion_At:
+                clear_shape_under_mouse()
+
                 if shape_id_under_mouse is not None:
                     shape_under_mouse = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_under_mouse)
                     n_canvas.mouse_interactor.set_shape_under_mouse(shape_id_under_mouse)
@@ -177,43 +236,41 @@ class MyTestCase(unittest.TestCase):
                         shape_under_mouse.fill_color = 'yellow'
                         n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
 
-                else:
-                    uncleared_shape_id = n_canvas.mouse_interactor.get_shape_under_mouse()
-                    if uncleared_shape_id is not None:
-                        n_canvas.mouse_interactor.clear_shape_under_mouse()
-                        shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
-
-                        if uncleared_shape_id not in n_canvas.selection_interactor.get_shapes_selected():
-                            shape_to_clear.fill_color = 'pink'
-                            n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
-
             elif event == c.Left_Click:
                 n_canvas.mouse_interactor.set_clicked_position(x, y)
+                n_canvas.mouse_interactor.set_previous_position(x, y)
+
                 if shape_id_under_mouse is not None:
-                    n_canvas.selection_interactor.select_shapes([shape_id_under_mouse])
-                    for shape_id in n_canvas.selection_interactor.get_shapes_selected():
-                        shape = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
-                        shape.fill_color = 'orange'
-                        n_canvas.rectangle_interactor.set_fill_color(shape)
+                    n_canvas.mouse_interactor.turn_on_dragging_mode()
+
+                    selected_shape_ids = n_canvas.selection_interactor.get_shapes_selected()
+                    if shape_id_under_mouse not in selected_shape_ids:
+                        clear_selections()
+                        select_shapes([shape_id_under_mouse])
                 else:
-                    for shape_id in n_canvas.selection_interactor.get_shapes_selected():
-                        shape = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
-                        shape.fill_color = 'pink'
-                        n_canvas.rectangle_interactor.set_fill_color(shape)
-                    n_canvas.selection_interactor.clear_shapes_selected()
+                    clear_selections()
 
             elif event == c.Left_Click_Drag:
-                shape_ids_selected = n_canvas.selection_interactor.get_shapes_selected()
-                if shape_ids_selected:
-                    x0, y0 = n_canvas.mouse_interactor.get_clicked_position()
-                    delta_x = x - x0
-                    delta_y = y - y0
-                    for shape_id in shape_ids_selected:
-                        shape_selected = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
-                        shape_selected.x += delta_x
-                        shape_selected.y += delta_y
-                        n_canvas.rectangle_interactor.draw(shape_selected)
-                    n_canvas.mouse_interactor.set_clicked_position(x, y)
+
+                if n_canvas.mouse_interactor.is_dragging_mode():
+                    shape_ids_selected = n_canvas.selection_interactor.get_shapes_selected()
+                    shape_ids_selected = [s for s in shape_ids_selected if s != c.SHAPE_SELECTOR]
+                    if shape_ids_selected:
+                        drag_shapes(shape_ids_selected, x, y)
+                else:
+                    clear_selections()
+                    draw_shape_selector(x, y)
+                    shape_ids_in_selector = get_shape_ids_in_selector(x, y)
+                    select_shapes(shape_ids_in_selector)
+
+                n_canvas.mouse_interactor.set_previous_position(x, y)
+
+            elif event == c.Left_Click_Release:
+                shape_selector = n_canvas.rectangle_interactor.get_shape_by_id(c.SHAPE_SELECTOR)
+                n_canvas.mouse_interactor.turn_off_dragging_mode()
+                if shape_selector is not None:
+                    n_canvas.mouse_interactor.clear_clicked_position()
+                    n_canvas.erase_shape(**shape_selector.state)
 
         # [Canvas and Mouse actions]###########################################################
         mouse_handler = canvas.mouse_handler
@@ -296,29 +353,42 @@ class MyTestCase(unittest.TestCase):
         from gui.canvas.rectangle.set_properties import set_border_color
         from gui.canvas.rectangle.set_properties import fill
         from gui.canvas.rectangle.set_properties import set_border_width
-        from gui.canvas.rectangle.set_properties import set_rectangle_width
+        from gui.canvas.rectangle.set_properties import set_rectangle_width_height
         n_canvas.subscribe(c.DRAW_RECTANGLE, lambda **data: move_or_draw_rectangle(canvas, **data))
-        n_canvas.subscribe(c.SET_RECTANGLE_WIDTH, lambda **data: set_rectangle_width(canvas, **data))
+        n_canvas.subscribe(c.SET_RECTANGLE_WIDTH, lambda **data: set_rectangle_width_height(canvas, **data))
         n_canvas.subscribe(c.SET_RECTANGLE_BORDER_COLOR, lambda **data: set_border_color(canvas, **data))
         n_canvas.subscribe(c.SET_RECTANGLE_FILL_COLOR, lambda **data: fill(canvas, **data))
         n_canvas.subscribe(c.SET_RECTANGLE_BORDER_WIDTH, lambda **data: set_border_width(canvas, **data))
+        n_canvas.subscribe(c.ERASE_SHAPE, lambda **data: canvas.erase_shape(**data))
 
         # [Define commands]###########################################################
-        def get_selected_rectangle():
-            selected_rectangle_ids = n_canvas.selection_interactor.get_shapes_selected()
-            if selected_rectangle_ids is not None and len(selected_rectangle_ids) > 0:
-                return n_canvas.rectangle_interactor.get_shape_by_id(selected_rectangle_ids[0])
+        from n_canvas.shapes.rectangle import Rectangle
 
-        def add_new_rectangle():
+        def get_selected_rectangles() -> tuple[Rectangle]:
+            selected_shapes_id = n_canvas.selection_interactor.get_shapes_selected()
+            if selected_shapes_id is not None:
+                shapes = tuple(n_canvas.get_any_shape_by_id(shape_id) for shape_id in selected_shapes_id)
+                return tuple(s for s in shapes if n_canvas.rectangle_interactor.is_rectangle(s))
+
+        def add_new_rectangle(**kwargs):
             nonlocal rectangle_id
+            shape_id = kwargs.get('id', f'rectangle_{rectangle_id}')
+            x = kwargs.get('x', 10)
+            y = kwargs.get('y', 10)
+            width = kwargs.get('width', 100)
+            height = kwargs.get('height', 25)
+            border_color = kwargs.get('border_color', 'blue')
+            border_width = kwargs.get('border_width', 2)
+            fill_color = kwargs.get('fill_color', 'pink')
+
             rectangle_id += 1
-            rectangle = n_canvas.rectangle_interactor.add_new_shape(id=f'rectangle_{rectangle_id}')
-            rectangle.set_position(10, 10)
-            rectangle.width = 100
-            rectangle.height = 25
-            rectangle.border_color = 'blue'
-            rectangle.border_width = 2
-            rectangle.fill_color = 'pink'
+            rectangle = n_canvas.rectangle_interactor.add_new_shape(id=shape_id)
+            rectangle.set_position(x, y)
+            rectangle.width = width
+            rectangle.height = height
+            rectangle.border_color = border_color
+            rectangle.border_width = border_width
+            rectangle.fill_color = fill_color
 
             n_canvas.rectangle_interactor.draw(rectangle)
             n_canvas.selection_interactor.select_shapes([rectangle.id])
@@ -330,33 +400,28 @@ class MyTestCase(unittest.TestCase):
             c.config(highlightbackground=color)
 
         def move_and_draw(x: int, y: int):
-            rectangle = get_selected_rectangle()
-            if rectangle is not None:
+            for rectangle in get_selected_rectangles():
                 rectangle.x += x
                 rectangle.y += y
                 n_canvas.rectangle_interactor.draw(rectangle)
 
         def add_width(width: int):
-            rectangle = get_selected_rectangle()
-            if rectangle is not None:
+            for rectangle in get_selected_rectangles():
                 rectangle.width += width
                 n_canvas.rectangle_interactor.set_width(rectangle)
 
         def change_border_color(color: str):
-            rectangle = get_selected_rectangle()
-            if rectangle is not None:
+            for rectangle in get_selected_rectangles():
                 rectangle.border_color = color
                 n_canvas.rectangle_interactor.set_border_color(rectangle)
 
         def fill_rectangle_with(color: str):
-            rectangle = get_selected_rectangle()
-            if rectangle is not None:
+            for rectangle in get_selected_rectangles():
                 rectangle.fill_color = color
                 n_canvas.rectangle_interactor.set_fill_color(rectangle)
 
         def add_rectangle_border_width(width: int):
-            rectangle = get_selected_rectangle()
-            if rectangle is not None:
+            for rectangle in get_selected_rectangles():
                 rectangle.border_width += width
                 n_canvas.rectangle_interactor.set_border_width(rectangle)
 
