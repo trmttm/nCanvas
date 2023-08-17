@@ -11,7 +11,18 @@ from .interactor_rectangle import RectangleInteractor
 
 
 class MouseInteractor:
-    pass
+    def __init__(self, set, get):
+        self._set = set
+        self._get = get
+
+    def set_shape_under_mouse(self, shape_id: str):
+        self._set(c.SHAPE_UNDER_MOUSE, shape_id)
+
+    def clear_shape_under_mouse(self):
+        self._set(c.SHAPE_UNDER_MOUSE, None)
+
+    def get_shape_under_mouse(self) -> str:
+        return self._get(c.SHAPE_UNDER_MOUSE)
 
 
 class Canvas(Entity):
@@ -22,7 +33,7 @@ class Canvas(Entity):
         self.backup()
         self._subscribers: dict[[str], list] = {}
         self._rectangle_interactor = RectangleInteractor(self.create_a_shape, self.get_any_shape_by_id, self._notify)
-        self._mouse_interactor = MouseInteractor()
+        self._mouse_interactor = MouseInteractor(self.set, self.get)
 
     def undo(self):
         for shape in self._shapes:
@@ -61,20 +72,15 @@ class Canvas(Entity):
         else:
             self._subscribers[key] = [subscriber]
 
-    def set_shape_under_mouse(self, shape_id: str):
-        self.set(c.SHAPE_UNDER_MOUSE, shape_id)
-
-    def clear_shape_under_mouse(self):
-        self.set(c.SHAPE_UNDER_MOUSE, None)
-
-    def get_shape_under_mouse(self) -> str:
-        return self.get(c.SHAPE_UNDER_MOUSE)
-
-    @property
-    def rectangle_interactor(self) -> RectangleInteractor:
-        return self._rectangle_interactor
-
     def _notify(self, key, **kwargs):
         if key in self._subscribers:
             for subscriber in self._subscribers.get(key):
                 subscriber(**kwargs)
+
+    @property
+    def mouse_interactor(self) -> MouseInteractor:
+        return self._mouse_interactor
+
+    @property
+    def rectangle_interactor(self) -> RectangleInteractor:
+        return self._rectangle_interactor

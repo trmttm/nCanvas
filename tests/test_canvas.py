@@ -167,15 +167,15 @@ class MyTestCase(unittest.TestCase):
 
             if event == c.Mouse_Motion_At and shape_id_under_mouse:
                 shape_under_mouse = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_under_mouse)
-                n_canvas.set_shape_under_mouse(shape_id_under_mouse)
+                n_canvas.mouse_interactor.set_shape_under_mouse(shape_id_under_mouse)
 
                 shape_under_mouse.fill_color = 'yellow'
                 n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
 
             elif event == c.Mouse_Motion_At and shape_id_under_mouse is None:
-                uncleared_shape_id = n_canvas.get_shape_under_mouse()
+                uncleared_shape_id = n_canvas.mouse_interactor.get_shape_under_mouse()
                 if uncleared_shape_id is not None:
-                    n_canvas.clear_shape_under_mouse()
+                    n_canvas.mouse_interactor.clear_shape_under_mouse()
                     shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
                     shape_to_clear.fill_color = 'pink'
                     n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
