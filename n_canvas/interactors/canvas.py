@@ -5,9 +5,13 @@ from n_memento import Entity
 from n_canvas import constants as c
 from n_canvas.interfaces import IShape
 from n_canvas.shapes.line import Line
-from n_canvas.shapes.rectangle import Rectangle
 from n_canvas.shapes.text import Text
 from n_canvas.shapes.text_box import TextBox
+from .interactor_rectangle import RectangleInteractor
+
+
+class MouseInteractor:
+    pass
 
 
 class Canvas(Entity):
@@ -16,9 +20,9 @@ class Canvas(Entity):
         super().__init__()
         self._shapes: list[Union[IShape, Entity]] = []
         self.backup()
-        self._subscribers: dict[[str], list] = {
-            c.DRAW_RECTANGLE: []
-        }
+        self._subscribers: dict[[str], list] = {}
+        self._rectangle_interactor = RectangleInteractor(self.create_a_shape, self.get_any_shape_by_id, self._notify)
+        self._mouse_interactor = MouseInteractor()
 
     def undo(self):
         for shape in self._shapes:
@@ -31,13 +35,10 @@ class Canvas(Entity):
         self.set(c.SHAPES, tuple(shape.state for shape in self._shapes))
         super().backup()
 
-    def get_shape_by_id(self, shape_id: str) -> IShape:
+    def get_any_shape_by_id(self, shape_id: str) -> IShape:
         for shape in self._shapes:
             if shape.id == shape_id:
                 return shape
-
-    def add_rectangle(self, **kwargs) -> Rectangle:
-        return self.create_a_shape(Rectangle, **kwargs)
 
     def add_text_box(self, **kwargs) -> TextBox:
         return self.create_a_shape(TextBox, **kwargs)
@@ -69,23 +70,9 @@ class Canvas(Entity):
     def get_shape_under_mouse(self) -> str:
         return self.get(c.SHAPE_UNDER_MOUSE)
 
-    def get_rectangle_by_id(self, shape_id) -> Rectangle:
-        return self.get_shape_by_id(shape_id)
-
-    def draw_rectangle(self, rectangle: Rectangle):
-        self._notify(c.DRAW_RECTANGLE, **rectangle.state)
-
-    def set_rectangle_width(self, rectangle: Rectangle):
-        self._notify(c.SET_RECTANGLE_WIDTH, **rectangle.state)
-
-    def set_rectangle_border_color(self, rectangle: Rectangle):
-        self._notify(c.SET_RECTANGLE_BORDER_COLOR, **rectangle.state)
-
-    def set_rectangle_fill_color(self, rectangle: Rectangle):
-        self._notify(c.SET_RECTANGLE_FILL_COLOR, **rectangle.state)
-
-    def set_rectangle_border_width(self, rectangle: Rectangle):
-        self._notify(c.SET_RECTANGLE_BORDER_WIDTH, **rectangle.state)
+    @property
+    def rectangle_interactor(self) -> RectangleInteractor:
+        return self._rectangle_interactor
 
     def _notify(self, key, **kwargs):
         if key in self._subscribers:

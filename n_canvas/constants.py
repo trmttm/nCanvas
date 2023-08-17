@@ -4,6 +4,9 @@ TEXT = 'text'
 TEXT_BOX = 'text_box'
 
 SHAPES = 'SHAPES'
+EVENT = 'event'
+X = 'x'
+Y = 'y'
 SHAPE_UNDER_MOUSE = 'SHAPE_UNDER_MOUSE'
 
 # commands

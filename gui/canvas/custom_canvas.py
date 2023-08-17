@@ -2,7 +2,7 @@ import tkinter as tk
 
 from gui.canvas.interface import ICustomCanvas
 from .mouse import MouseHandler
-
+from n_canvas import constants as c
 tk_shift = 'Shift'
 tk_control = 'Control'
 tk_command = 'Command'
@@ -30,7 +30,7 @@ class CustomCanvas(ICustomCanvas, tk.Canvas):
             shape_under_mouse = e.widget.itemconfigure('current')['tags'][-1].split(' ')[0]
         except KeyError:
             shape_under_mouse = None
-        return {'x': self.canvasx(e.x), 'y': self.canvasy(e.y), 'shape_under_mouse': shape_under_mouse}
+        return {c.X: self.canvasx(e.x), c.Y: self.canvasy(e.y), c.SHAPE_UNDER_MOUSE: shape_under_mouse}
 
 
 def create_custom_canvas(parent) -> CustomCanvas:

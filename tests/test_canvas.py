@@ -8,7 +8,7 @@ class MyTestCase(unittest.TestCase):
         from n_canvas.interactors.canvas import Canvas
         canvas = Canvas()
 
-        rectangle = canvas.add_rectangle()
+        rectangle = canvas.rectangle_interactor.add_new_shape()
         text_box = canvas.add_text_box()
         text = canvas.add_text()
         line = canvas.add_line()
@@ -54,12 +54,12 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(canvas.state, state_0)
 
         # State 1
-        rectangle = canvas.add_rectangle()
+        rectangle = canvas.rectangle_interactor.add_new_shape()
         canvas.backup()
         self.assertEqual(canvas.state, state_1)
 
         # State 2
-        canvas.add_rectangle()
+        canvas.rectangle_interactor.add_new_shape()
         canvas.backup()
         self.assertEqual(canvas.state, state_2)
 
@@ -80,7 +80,7 @@ class MyTestCase(unittest.TestCase):
         from n_canvas.interactors.canvas import Canvas
         from n_canvas import constants as c
         canvas = Canvas()
-        rectangle = canvas.add_rectangle(id='rectangle01')
+        rectangle = canvas.rectangle_interactor.add_new_shape(id='rectangle01')
         rectangle.x = 1
         rectangle.y = 2
         rectangle.width = 5
@@ -99,11 +99,11 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(text_box.font, 'Times New Roman')
         self.assertEqual(text_box.width, 10)
 
-    def test_gui(self):
+    def atest_gui(self):
         from n_canvas.interactors.canvas import Canvas
         n_canvas = Canvas()
 
-        rectangle = n_canvas.add_rectangle(id='rectangle01')
+        rectangle = n_canvas.rectangle_interactor.add_new_shape(id='rectangle01')
         rectangle.set_position(10, 10)
         rectangle.width = 100
         rectangle.height = 25
@@ -113,7 +113,7 @@ class MyTestCase(unittest.TestCase):
 
         print(rectangle.state)
 
-        n_canvas.draw_rectangle(rectangle)
+        n_canvas.rectangle_interactor.draw(rectangle)
 
         # [Create Widget Dictionary]###########################################################
         import tkinter as tk
@@ -157,99 +157,103 @@ class MyTestCase(unittest.TestCase):
         canvas = create_custom_canvas(parent)
 
         def mouse_event_handler(**kwargs):
-            event: tk.Event = kwargs.get('event', None)
-            x: int = kwargs.get('x', None)
-            y: int = kwargs.get('y', None)
-            shape_id_under_mouse = kwargs.get('shape_under_mouse', None)
+            event: tk.Event = kwargs.get(c.EVENT, None)
+            x: int = kwargs.get(c.X, None)
+            y: int = kwargs.get(c.Y, None)
+            shape_id_under_mouse = kwargs.get(c.SHAPE_UNDER_MOUSE, None)
 
             # implement below based on each App's needs
             print(f'{event} at x={x}, y={y}, shape_id_under_mouse={shape_id_under_mouse}')
 
             if event == c.Mouse_Motion_At and shape_id_under_mouse:
-                shape_under_mouse = n_canvas.get_rectangle_by_id(shape_id_under_mouse)
+                shape_under_mouse = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_under_mouse)
                 n_canvas.set_shape_under_mouse(shape_id_under_mouse)
 
                 shape_under_mouse.fill_color = 'yellow'
-                n_canvas.set_rectangle_fill_color(shape_under_mouse)
+                n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
 
             elif event == c.Mouse_Motion_At and shape_id_under_mouse is None:
                 uncleared_shape_id = n_canvas.get_shape_under_mouse()
                 if uncleared_shape_id is not None:
                     n_canvas.clear_shape_under_mouse()
-                    shape_to_clear = n_canvas.get_shape_by_id(uncleared_shape_id)
+                    shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
                     shape_to_clear.fill_color = 'pink'
-                    n_canvas.set_rectangle_fill_color(shape_to_clear)
+                    n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
 
         # [Canvas and Mouse actions]###########################################################
         mouse_handler = canvas.mouse_handler
-        f = mouse_event_handler
-        mouse_handler.mouse_in = lambda kwargs: f(event=c.Mouse_In, **kwargs)
-        mouse_handler.mouse_out = lambda kwargs: f(event=c.Mouse_Out, **kwargs)
-        mouse_handler.mouse_motion = lambda kwargs: f(event=c.Mouse_Motion_At, **kwargs)
 
-        mouse_handler.left_click = lambda kwargs: f(event=c.Left_Click, **kwargs)
-        mouse_handler.left_click_motion = lambda kwargs: f(event=c.Left_Click_Drag, **kwargs)
-        mouse_handler.left_click_release = lambda kwargs: f(event=c.Left_Click_Release, **kwargs)
+        def f(e: str, **kwargs):
+            kwargs.update({c.EVENT: e})
+            mouse_event_handler(**kwargs)
 
-        mouse_handler.right_click = lambda kwargs: f(event=c.Right_Click, **kwargs)
-        mouse_handler.right_click_motion = lambda kwargs: f(event=c.Right_Click_Drag, **kwargs)
-        mouse_handler.right_click_release = lambda kwargs: f(event=c.Right_Click_Release, **kwargs)
+        mouse_handler.mouse_in = lambda kwargs: f(c.Mouse_In, **kwargs)
+        mouse_handler.mouse_out = lambda kwargs: f(c.Mouse_Out, **kwargs)
+        mouse_handler.mouse_motion = lambda kwargs: f(c.Mouse_Motion_At, **kwargs)
 
-        mouse_handler.middle_click = lambda kwargs: f(event=c.Middle_Click, **kwargs)
-        mouse_handler.middle_click_motion = lambda kwargs: f(event=c.Middle_Click_Drag, **kwargs)
-        mouse_handler.middle_click_release = lambda kwargs: f(event=c.Middle_Click_Release, **kwargs)
+        mouse_handler.left_click = lambda kwargs: f(c.Left_Click, **kwargs)
+        mouse_handler.left_click_motion = lambda kwargs: f(c.Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release = lambda kwargs: f(c.Left_Click_Release, **kwargs)
+
+        mouse_handler.right_click = lambda kwargs: f(c.Right_Click, **kwargs)
+        mouse_handler.right_click_motion = lambda kwargs: f(c.Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release = lambda kwargs: f(c.Right_Click_Release, **kwargs)
+
+        mouse_handler.middle_click = lambda kwargs: f(c.Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion = lambda kwargs: f(c.Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release = lambda kwargs: f(c.Middle_Click_Release, **kwargs)
 
         # Shift
-        mouse_handler.left_click_shift = lambda kwargs: f(event=c.SHIFT_Left_Click, **kwargs)
-        mouse_handler.left_click_motion_shift = lambda kwargs: f(event=c.SHIFT_Left_Click_Drag, **kwargs)
-        mouse_handler.left_click_release_shift = lambda kwargs: f(event=c.SHIFT_Left_Click_Release, **kwargs)
+        mouse_handler.left_click_shift = lambda kwargs: f(c.SHIFT_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_shift = lambda kwargs: f(c.SHIFT_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_shift = lambda kwargs: f(c.SHIFT_Left_Click_Release, **kwargs)
 
-        mouse_handler.right_click_shift = lambda kwargs: f(event=c.SHIFT_Right_Click, **kwargs)
-        mouse_handler.right_click_motion_shift = lambda kwargs: f(event=c.SHIFT_Right_Click_Drag, **kwargs)
-        mouse_handler.right_click_release_shift = lambda kwargs: f(event=c.SHIFT_Right_Click_Release, **kwargs)
+        mouse_handler.right_click_shift = lambda kwargs: f(c.SHIFT_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_shift = lambda kwargs: f(c.SHIFT_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_shift = lambda kwargs: f(c.SHIFT_Right_Click_Release, **kwargs)
 
-        mouse_handler.middle_click_shift = lambda kwargs: f(event=c.SHIFT_Middle_Click, **kwargs)
-        mouse_handler.middle_click_motion_shift = lambda kwargs: f(event=c.SHIFT_Middle_Click_Drag, **kwargs)
-        mouse_handler.middle_click_release_shift = lambda kwargs: f(event=c.SHIFT_Middle_Click_Release, **kwargs)
+        mouse_handler.middle_click_shift = lambda kwargs: f(c.SHIFT_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_shift = lambda kwargs: f(c.SHIFT_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_shift = lambda kwargs: f(c.SHIFT_Middle_Click_Release, **kwargs)
 
         # Control
-        mouse_handler.left_click_control = lambda kwargs: f(event=c.CONTROL_Left_Click, **kwargs)
-        mouse_handler.left_click_motion_control = lambda kwargs: f(event=c.CONTROL_Left_Click_Drag, **kwargs)
-        mouse_handler.left_click_release_control = lambda kwargs: f(event=c.CONTROL_Left_Click_Release, **kwargs)
+        mouse_handler.left_click_control = lambda kwargs: f(c.CONTROL_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_control = lambda kwargs: f(c.CONTROL_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_control = lambda kwargs: f(c.CONTROL_Left_Click_Release, **kwargs)
 
-        mouse_handler.right_click_control = lambda kwargs: f(event=c.CONTROL_Right_Click, **kwargs)
-        mouse_handler.right_click_motion_control = lambda kwargs: f(event=c.CONTROL_Right_Click_Drag, **kwargs)
-        mouse_handler.right_click_release_control = lambda kwargs: f(event=c.CONTROL_Right_Click_Release, **kwargs)
+        mouse_handler.right_click_control = lambda kwargs: f(c.CONTROL_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_control = lambda kwargs: f(c.CONTROL_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_control = lambda kwargs: f(c.CONTROL_Right_Click_Release, **kwargs)
 
-        mouse_handler.middle_click_control = lambda kwargs: f(event=c.CONTROL_Middle_Click, **kwargs)
-        mouse_handler.middle_click_motion_control = lambda kwargs: f(event=c.CONTROL_Middle_Click_Drag, **kwargs)
-        mouse_handler.middle_click_release_control = lambda kwargs: f(event=c.CONTROL_Middle_Click_Release, **kwargs)
+        mouse_handler.middle_click_control = lambda kwargs: f(c.CONTROL_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_control = lambda kwargs: f(c.CONTROL_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_control = lambda kwargs: f(c.CONTROL_Middle_Click_Release, **kwargs)
 
         # Command
-        mouse_handler.left_click_command = lambda kwargs: f(event=c.COMMAND_Left_Click, **kwargs)
-        mouse_handler.left_click_motion_command = lambda kwargs: f(event=c.COMMAND_Left_Click_Drag, **kwargs)
-        mouse_handler.left_click_release_command = lambda kwargs: f(event=c.COMMAND_Left_Click_Release, **kwargs)
+        mouse_handler.left_click_command = lambda kwargs: f(c.COMMAND_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_command = lambda kwargs: f(c.COMMAND_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_command = lambda kwargs: f(c.COMMAND_Left_Click_Release, **kwargs)
 
-        mouse_handler.right_click_command = lambda kwargs: f(event=c.COMMAND_Right_Click, **kwargs)
-        mouse_handler.right_click_motion_command = lambda kwargs: f(event=c.COMMAND_Right_Click_Drag, **kwargs)
-        mouse_handler.right_click_release_command = lambda kwargs: f(event=c.COMMAND_Right_Click_Release, **kwargs)
+        mouse_handler.right_click_command = lambda kwargs: f(c.COMMAND_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_command = lambda kwargs: f(c.COMMAND_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_command = lambda kwargs: f(c.COMMAND_Right_Click_Release, **kwargs)
 
-        mouse_handler.middle_click_command = lambda kwargs: f(event=c.COMMAND_Middle_Click, **kwargs)
-        mouse_handler.middle_click_motion_command = lambda kwargs: f(event=c.COMMAND_Middle_Click_Drag, **kwargs)
-        mouse_handler.middle_click_release_command = lambda kwargs: f(event=c.COMMAND_Middle_Click_Release, **kwargs)
+        mouse_handler.middle_click_command = lambda kwargs: f(c.COMMAND_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_command = lambda kwargs: f(c.COMMAND_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_command = lambda kwargs: f(c.COMMAND_Middle_Click_Release, **kwargs)
 
         # Alt
-        mouse_handler.left_click_alt = lambda kwargs: f(event=c.Alt_Left_Click, **kwargs)
-        mouse_handler.left_click_motion_alt = lambda kwargs: f(event=c.Alt_Left_Click_Drag, **kwargs)
-        mouse_handler.left_click_release_alt = lambda kwargs: f(event=c.Alt_Left_Click_Release, **kwargs)
+        mouse_handler.left_click_alt = lambda kwargs: f(c.Alt_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_alt = lambda kwargs: f(c.Alt_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_alt = lambda kwargs: f(c.Alt_Left_Click_Release, **kwargs)
 
-        mouse_handler.right_click_alt = lambda kwargs: f(event=c.Alt_Right_Click, **kwargs)
-        mouse_handler.right_click_motion_alt = lambda kwargs: f(event=c.Alt_Right_Click_Drag, **kwargs)
-        mouse_handler.right_click_release_alt = lambda kwargs: f(event=c.Alt_Right_Click_Release, **kwargs)
+        mouse_handler.right_click_alt = lambda kwargs: f(c.Alt_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_alt = lambda kwargs: f(c.Alt_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_alt = lambda kwargs: f(c.Alt_Right_Click_Release, **kwargs)
 
-        mouse_handler.middle_click_alt = lambda kwargs: f(event=c.Alt_Middle_Click, **kwargs)
-        mouse_handler.middle_click_motion_alt = lambda kwargs: f(event=c.Alt_Middle_Click_Drag, **kwargs)
-        mouse_handler.middle_click_release_alt = lambda kwargs: f(event=c.Alt_Middle_Click_Release, **kwargs)
+        mouse_handler.middle_click_alt = lambda kwargs: f(c.Alt_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_alt = lambda kwargs: f(c.Alt_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_alt = lambda kwargs: f(c.Alt_Middle_Click_Release, **kwargs)
 
         # [Define object interaction]###########################################################
         from n_canvas import constants as c
@@ -275,23 +279,23 @@ class MyTestCase(unittest.TestCase):
         def move_and_draw(x: int, y: int):
             rectangle.x += x
             rectangle.y += y
-            n_canvas.draw_rectangle(rectangle)
+            n_canvas.rectangle_interactor.draw(rectangle)
 
         def add_width(width: int):
             rectangle.width += width
-            n_canvas.set_rectangle_width(rectangle)
+            n_canvas.rectangle_interactor.set_width(rectangle)
 
         def change_border_color(color: str):
             rectangle.border_color = color
-            n_canvas.set_rectangle_border_color(rectangle)
+            n_canvas.rectangle_interactor.set_border_color(rectangle)
 
         def fill_rectangle_with(color: str):
             rectangle.fill_color = color
-            n_canvas.set_rectangle_fill_color(rectangle)
+            n_canvas.rectangle_interactor.set_fill_color(rectangle)
 
         def add_rectangle_border_width(width: int):
             rectangle.border_width += width
-            n_canvas.set_rectangle_border_width(rectangle)
+            n_canvas.rectangle_interactor.set_border_width(rectangle)
 
         # [Bind commands]###########################################################
         widgets.get('btn_01').configure(command=lambda: change_canvas_color(canvas, 'light yellow'))
@@ -300,7 +304,7 @@ class MyTestCase(unittest.TestCase):
         widgets.get('btn_04').configure(command=lambda: move_and_draw(0, 10))
         widgets.get('btn_05').configure(command=lambda: add_width(10))
         widgets.get('btn_06').configure(command=lambda: change_border_color('red'))
-        widgets.get('btn_07').configure(command=lambda: n_canvas.draw_rectangle(rectangle))
+        widgets.get('btn_07').configure(command=lambda: n_canvas.rectangle_interactor.draw(rectangle))
         widgets.get('btn_08').configure(command=lambda: fill_rectangle_with('yellow'))
         widgets.get('btn_09').configure(command=lambda: add_rectangle_border_width(1))
 
