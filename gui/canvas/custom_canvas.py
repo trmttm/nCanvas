@@ -25,8 +25,12 @@ class CustomCanvas(ICustomCanvas, tk.Canvas):
         super().__init__(*args, **kwargs)
         self.mouse_handler = MouseHandler(self)
 
-    def get_xy(self, e: tk.Event) -> tuple[int, int]:
-        return self.canvasx(e.x), self.canvasy(e.y)
+    def get_mouse_state(self, e: tk.Event) -> dict:
+        try:
+            shape_under_mouse = e.widget.itemconfigure('current')['tags'][-1].split(' ')[0]
+        except KeyError:
+            shape_under_mouse = None
+        return {'x': self.canvasx(e.x), 'y': self.canvasy(e.y), 'shape_under_mouse': shape_under_mouse}
 
 
 def create_custom_canvas(parent) -> CustomCanvas:

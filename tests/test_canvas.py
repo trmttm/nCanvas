@@ -42,10 +42,11 @@ class MyTestCase(unittest.TestCase):
 
     def test_undo_redo_state_io(self):
         from n_canvas.interactors.canvas import Canvas
-        state_0 = {'shapes': ()}
-        state_1 = {'shapes': ({'x': 0, 'y': 0},)}
-        state_2 = {'shapes': ({'x': 0, 'y': 0}, {'x': 0, 'y': 0},)}
-        state_3 = {'shapes': ({'x': 1, 'y': 0}, {'x': 0, 'y': 0},)}
+        from n_canvas import constants as c
+        state_0 = {c.SHAPES: ()}
+        state_1 = {c.SHAPES: ({'x': 0, 'y': 0},)}
+        state_2 = {c.SHAPES: ({'x': 0, 'y': 0}, {'x': 0, 'y': 0},)}
+        state_3 = {c.SHAPES: ({'x': 1, 'y': 0}, {'x': 0, 'y': 0},)}
 
         canvas = Canvas()
 
@@ -77,6 +78,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_shape_with_descriptor(self):
         from n_canvas.interactors.canvas import Canvas
+        from n_canvas import constants as c
         canvas = Canvas()
         rectangle = canvas.add_rectangle(id='rectangle01')
         rectangle.x = 1
@@ -85,7 +87,7 @@ class MyTestCase(unittest.TestCase):
         rectangle.height = 10
         canvas.backup()
 
-        self.assertEqual(canvas.state, {'shapes': ({'id': 'rectangle01', 'height': 10, 'width': 5, 'x': 1, 'y': 2},)})
+        self.assertEqual(canvas.state, {c.SHAPES: ({'id': 'rectangle01', 'height': 10, 'width': 5, 'x': 1, 'y': 2},)})
         self.assertEqual(rectangle.width, 5)
         self.assertEqual(rectangle.height, 10)
 
@@ -154,82 +156,84 @@ class MyTestCase(unittest.TestCase):
 
         canvas = create_custom_canvas(parent)
 
-        def get_shape_under_mouse(e):
-            try:
-                key = e.widget.itemconfigure('current')['tags'][-1].split(' ')[0]
-                print(key, ' is under mouse.')
-            except KeyError:
-                key = None
+        def mouse_event_handler(**kwargs):
+            event: tk.Event = kwargs.get('event', None)
+            x: int = kwargs.get('x', None)
+            y: int = kwargs.get('y', None)
+            shape_under_mouse = kwargs.get('shape_under_mouse', None)
+
+            print(f'{event} at x={x}, y={y}, shape_under_mouse={shape_under_mouse}')
 
         # [Canvas and Mouse actions]###########################################################
-        canvas.mouse_handler.mouse_in = lambda x, y: print('Mouse In', x, y)
-        canvas.mouse_handler.mouse_out = lambda x, y: print('Mouse Out', x, y)
-        # canvas.mouse_handler.mouse_motion = lambda x, y: print('Mouse Motion At', x, y)
-        canvas.mouse_handler.mouse_motion = get_shape_under_mouse
+        mouse_handler = canvas.mouse_handler
+        f = mouse_event_handler
+        mouse_handler.mouse_in = lambda kwargs: f(event=c.Mouse_In, **kwargs)
+        mouse_handler.mouse_out = lambda kwargs: f(event=c.Mouse_Out, **kwargs)
+        mouse_handler.mouse_motion = lambda kwargs: f(event=c.Mouse_Motion_At, **kwargs)
 
-        canvas.mouse_handler.left_click = lambda x, y: print('Left Click', x, y)
-        canvas.mouse_handler.left_click_motion = lambda x, y: print('Left Click Drag', x, y)
-        canvas.mouse_handler.left_click_release = lambda x, y: print('Left Click Release', x, y)
+        mouse_handler.left_click = lambda kwargs: f(event=c.Left_Click, **kwargs)
+        mouse_handler.left_click_motion = lambda kwargs: f(event=c.Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release = lambda kwargs: f(event=c.Left_Click_Release, **kwargs)
 
-        canvas.mouse_handler.right_click = lambda x, y: print('Right Click', x, y)
-        canvas.mouse_handler.right_click_motion = lambda x, y: print('Right Click Drag', x, y)
-        canvas.mouse_handler.right_click_release = lambda x, y: print('Right Click Release', x, y)
+        mouse_handler.right_click = lambda kwargs: f(event=c.Right_Click, **kwargs)
+        mouse_handler.right_click_motion = lambda kwargs: f(event=c.Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release = lambda kwargs: f(event=c.Right_Click_Release, **kwargs)
 
-        canvas.mouse_handler.middle_click = lambda x, y: print('Middle Click', x, y)
-        canvas.mouse_handler.middle_click_motion = lambda x, y: print('Middle Click Drag', x, y)
-        canvas.mouse_handler.middle_click_release = lambda x, y: print('Middle Click Release', x, y)
+        mouse_handler.middle_click = lambda kwargs: f(event=c.Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion = lambda kwargs: f(event=c.Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release = lambda kwargs: f(event=c.Middle_Click_Release, **kwargs)
 
         # Shift
-        canvas.mouse_handler.left_click_shift = lambda x, y: print('SHIFT Left Click', x, y)
-        canvas.mouse_handler.left_click_motion_shift = lambda x, y: print('SHIFT Left Click Drag', x, y)
-        canvas.mouse_handler.left_click_release_shift = lambda x, y: print('SHIFT Left Click Release', x, y)
+        mouse_handler.left_click_shift = lambda kwargs: f(event=c.SHIFT_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_shift = lambda kwargs: f(event=c.SHIFT_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_shift = lambda kwargs: f(event=c.SHIFT_Left_Click_Release, **kwargs)
 
-        canvas.mouse_handler.right_click_shift = lambda x, y: print('SHIFT Right Click', x, y)
-        canvas.mouse_handler.right_click_motion_shift = lambda x, y: print('SHIFT Right Click Drag', x, y)
-        canvas.mouse_handler.right_click_release_shift = lambda x, y: print('SHIFT Right Click Release', x, y)
+        mouse_handler.right_click_shift = lambda kwargs: f(event=c.SHIFT_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_shift = lambda kwargs: f(event=c.SHIFT_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_shift = lambda kwargs: f(event=c.SHIFT_Right_Click_Release, **kwargs)
 
-        canvas.mouse_handler.middle_click_shift = lambda x, y: print('SHIFT Middle Click', x, y)
-        canvas.mouse_handler.middle_click_motion_shift = lambda x, y: print('SHIFT Middle Click Drag', x, y)
-        canvas.mouse_handler.middle_click_release_shift = lambda x, y: print('SHIFT Middle Click Release', x, y)
+        mouse_handler.middle_click_shift = lambda kwargs: f(event=c.SHIFT_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_shift = lambda kwargs: f(event=c.SHIFT_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_shift = lambda kwargs: f(event=c.SHIFT_Middle_Click_Release, **kwargs)
 
         # Control
-        canvas.mouse_handler.left_click_control = lambda x, y: print('CONTROL Left Click', x, y)
-        canvas.mouse_handler.left_click_motion_control = lambda x, y: print('CONTROL Left Click Drag', x, y)
-        canvas.mouse_handler.left_click_release_control = lambda x, y: print('CONTROL Left Click Release', x, y)
+        mouse_handler.left_click_control = lambda kwargs: f(event=c.CONTROL_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_control = lambda kwargs: f(event=c.CONTROL_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_control = lambda kwargs: f(event=c.CONTROL_Left_Click_Release, **kwargs)
 
-        canvas.mouse_handler.right_click_control = lambda x, y: print('CONTROL Right Click', x, y)
-        canvas.mouse_handler.right_click_motion_control = lambda x, y: print('CONTROL Right Click Drag', x, y)
-        canvas.mouse_handler.right_click_release_control = lambda x, y: print('CONTROL Right Click Release', x, y)
+        mouse_handler.right_click_control = lambda kwargs: f(event=c.CONTROL_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_control = lambda kwargs: f(event=c.CONTROL_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_control = lambda kwargs: f(event=c.CONTROL_Right_Click_Release, **kwargs)
 
-        canvas.mouse_handler.middle_click_control = lambda x, y: print('CONTROL Middle Click', x, y)
-        canvas.mouse_handler.middle_click_motion_control = lambda x, y: print('CONTROL Middle Click Drag', x, y)
-        canvas.mouse_handler.middle_click_release_control = lambda x, y: print('CONTROL Middle Click Release', x, y)
+        mouse_handler.middle_click_control = lambda kwargs: f(event=c.CONTROL_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_control = lambda kwargs: f(event=c.CONTROL_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_control = lambda kwargs: f(event=c.CONTROL_Middle_Click_Release, **kwargs)
 
         # Command
-        canvas.mouse_handler.left_click_command = lambda x, y: print('COMMAND Left Click', x, y)
-        canvas.mouse_handler.left_click_motion_command = lambda x, y: print('COMMAND Left Click Drag', x, y)
-        canvas.mouse_handler.left_click_release_command = lambda x, y: print('COMMAND Left Click Release', x, y)
+        mouse_handler.left_click_command = lambda kwargs: f(event=c.COMMAND_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_command = lambda kwargs: f(event=c.COMMAND_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_command = lambda kwargs: f(event=c.COMMAND_Left_Click_Release, **kwargs)
 
-        canvas.mouse_handler.right_click_command = lambda x, y: print('COMMAND Right Click', x, y)
-        canvas.mouse_handler.right_click_motion_command = lambda x, y: print('COMMAND Right Click Drag', x, y)
-        canvas.mouse_handler.right_click_release_command = lambda x, y: print('COMMAND Right Click Release', x, y)
+        mouse_handler.right_click_command = lambda kwargs: f(event=c.COMMAND_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_command = lambda kwargs: f(event=c.COMMAND_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_command = lambda kwargs: f(event=c.COMMAND_Right_Click_Release, **kwargs)
 
-        canvas.mouse_handler.middle_click_command = lambda x, y: print('COMMAND Middle Click', x, y)
-        canvas.mouse_handler.middle_click_motion_command = lambda x, y: print('COMMAND Middle Click Drag', x, y)
-        canvas.mouse_handler.middle_click_release_command = lambda x, y: print('COMMAND Middle Click Release', x, y)
+        mouse_handler.middle_click_command = lambda kwargs: f(event=c.COMMAND_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_command = lambda kwargs: f(event=c.COMMAND_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_command = lambda kwargs: f(event=c.COMMAND_Middle_Click_Release, **kwargs)
 
         # Alt
-        canvas.mouse_handler.left_click_alt = lambda x, y: print('Alt Left Click', x, y)
-        canvas.mouse_handler.left_click_motion_alt = lambda x, y: print('Alt Left Click Drag', x, y)
-        canvas.mouse_handler.left_click_release_alt = lambda x, y: print('Alt Left Click Release', x, y)
+        mouse_handler.left_click_alt = lambda kwargs: f(event=c.Alt_Left_Click, **kwargs)
+        mouse_handler.left_click_motion_alt = lambda kwargs: f(event=c.Alt_Left_Click_Drag, **kwargs)
+        mouse_handler.left_click_release_alt = lambda kwargs: f(event=c.Alt_Left_Click_Release, **kwargs)
 
-        canvas.mouse_handler.right_click_alt = lambda x, y: print('Alt Right Click', x, y)
-        canvas.mouse_handler.right_click_motion_alt = lambda x, y: print('Alt Right Click Drag', x, y)
-        canvas.mouse_handler.right_click_release_alt = lambda x, y: print('Alt Right Click Release', x, y)
+        mouse_handler.right_click_alt = lambda kwargs: f(event=c.Alt_Right_Click, **kwargs)
+        mouse_handler.right_click_motion_alt = lambda kwargs: f(event=c.Alt_Right_Click_Drag, **kwargs)
+        mouse_handler.right_click_release_alt = lambda kwargs: f(event=c.Alt_Right_Click_Release, **kwargs)
 
-        canvas.mouse_handler.middle_click_alt = lambda x, y: print('Alt Middle Click', x, y)
-        canvas.mouse_handler.middle_click_motion_alt = lambda x, y: print('Alt Middle Click Drag', x, y)
-        canvas.mouse_handler.middle_click_release_alt = lambda x, y: print('Alt Middle Click Release', x, y)
+        mouse_handler.middle_click_alt = lambda kwargs: f(event=c.Alt_Middle_Click, **kwargs)
+        mouse_handler.middle_click_motion_alt = lambda kwargs: f(event=c.Alt_Middle_Click_Drag, **kwargs)
+        mouse_handler.middle_click_release_alt = lambda kwargs: f(event=c.Alt_Middle_Click_Release, **kwargs)
 
         # [Define object interaction]###########################################################
         from n_canvas import constants as c
