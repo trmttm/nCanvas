@@ -14,3 +14,12 @@ class MouseInteractor:
 
     def clear_shape_under_mouse(self):
         self._set(c.SHAPE_UNDER_MOUSE, None)
+
+    def set_clicked_position(self, x: int, y: int):
+        self._set(c.CLICKED_POSITION, (x, y))
+
+    def get_clicked_position(self) -> str:
+        return self._get(c.CLICKED_POSITION)
+
+    def clear_clicked_position(self):
+        self._set(c.CLICKED_POSITION, None)

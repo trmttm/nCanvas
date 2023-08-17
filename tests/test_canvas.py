@@ -99,7 +99,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(text_box.font, 'Times New Roman')
         self.assertEqual(text_box.width, 10)
 
-    def atest_gui(self):
+    def test_gui(self):
         from n_canvas.interactors.canvas import Canvas
         n_canvas = Canvas()
 
@@ -165,25 +165,27 @@ class MyTestCase(unittest.TestCase):
             # implement below based on each App's needs
             print(f'{event} at x={x}, y={y}, shape_id_under_mouse={shape_id_under_mouse}')
 
-            if event == c.Mouse_Motion_At and shape_id_under_mouse:
-                shape_under_mouse = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_under_mouse)
-                n_canvas.mouse_interactor.set_shape_under_mouse(shape_id_under_mouse)
+            if event == c.Mouse_Motion_At:
+                if shape_id_under_mouse is not None:
+                    shape_under_mouse = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_under_mouse)
+                    n_canvas.mouse_interactor.set_shape_under_mouse(shape_id_under_mouse)
 
-                if shape_id_under_mouse not in n_canvas.selection_interactor.get_shapes_selected():
-                    shape_under_mouse.fill_color = 'yellow'
-                    n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
+                    if shape_id_under_mouse not in n_canvas.selection_interactor.get_shapes_selected():
+                        shape_under_mouse.fill_color = 'yellow'
+                        n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
 
-            elif event == c.Mouse_Motion_At and shape_id_under_mouse is None:
-                uncleared_shape_id = n_canvas.mouse_interactor.get_shape_under_mouse()
-                if uncleared_shape_id is not None:
-                    n_canvas.mouse_interactor.clear_shape_under_mouse()
-                    shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
+                else:
+                    uncleared_shape_id = n_canvas.mouse_interactor.get_shape_under_mouse()
+                    if uncleared_shape_id is not None:
+                        n_canvas.mouse_interactor.clear_shape_under_mouse()
+                        shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
 
-                    if uncleared_shape_id not in n_canvas.selection_interactor.get_shapes_selected():
-                        shape_to_clear.fill_color = 'pink'
-                        n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
+                        if uncleared_shape_id not in n_canvas.selection_interactor.get_shapes_selected():
+                            shape_to_clear.fill_color = 'pink'
+                            n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
 
             elif event == c.Left_Click:
+                n_canvas.mouse_interactor.set_clicked_position(x, y)
                 if shape_id_under_mouse is not None:
                     n_canvas.selection_interactor.select_shapes([shape_id_under_mouse])
                     for shape_id in n_canvas.selection_interactor.get_shapes_selected():
@@ -196,6 +198,19 @@ class MyTestCase(unittest.TestCase):
                         shape.fill_color = 'pink'
                         n_canvas.rectangle_interactor.set_fill_color(shape)
                     n_canvas.selection_interactor.clear_shapes_selected()
+
+            elif event == c.Left_Click_Drag:
+                shape_ids_selected = n_canvas.selection_interactor.get_shapes_selected()
+                if shape_ids_selected:
+                    x0, y0 = n_canvas.mouse_interactor.get_clicked_position()
+                    delta_x = x - x0
+                    delta_y = y - y0
+                    for shape_id in shape_ids_selected:
+                        shape_selected = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
+                        shape_selected.x += delta_x
+                        shape_selected.y += delta_y
+                        n_canvas.rectangle_interactor.draw(shape_selected)
+                    n_canvas.mouse_interactor.set_clicked_position(x,y)
 
         # [Canvas and Mouse actions]###########################################################
         mouse_handler = canvas.mouse_handler
