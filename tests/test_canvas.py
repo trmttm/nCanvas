@@ -103,18 +103,6 @@ class MyTestCase(unittest.TestCase):
         from n_canvas.interactors.canvas import Canvas
         n_canvas = Canvas()
 
-        rectangle = n_canvas.rectangle_interactor.add_new_shape(id='rectangle01')
-        rectangle.set_position(10, 10)
-        rectangle.width = 100
-        rectangle.height = 25
-        rectangle.border_color = 'blue'
-        rectangle.border_width = 2
-        rectangle.fill_color = 'pink'
-
-        print(rectangle.state)
-
-        n_canvas.rectangle_interactor.draw(rectangle)
-
         # [Create Widget Dictionary]###########################################################
         import tkinter as tk
         from tkinter import ttk
@@ -126,7 +114,7 @@ class MyTestCase(unittest.TestCase):
             'btn_04': 'Move Rect Y and Draw',
             'btn_05': '+ Width',
             'btn_06': 'Border color red',
-            'btn_07': 'Draw Rect',
+            'btn_07': 'Add new Rectangle',
             'btn_08': 'Fill rectangle with yellow',
             'btn_09': '+ Border width',
         }
@@ -155,6 +143,21 @@ class MyTestCase(unittest.TestCase):
         parent.grid_columnconfigure(0, weight=1)
 
         canvas = create_custom_canvas(parent)
+
+        def key_event_handler(e: tk.Event, event):
+            keycode = e.keycode
+            if event == c.KEY_PRESS:
+                if keycode == 2080438019:
+                    move_and_draw(10, 0)
+                elif keycode == 2063660802:
+                    move_and_draw(-10, 0)
+                elif keycode == 2097215233:
+                    move_and_draw(0, 10)
+                elif keycode == 2113992448:
+                    move_and_draw(0, -10)
+            elif event == c.KEY_RELEASE:
+                pass
+            print(f'{event}, {e.keysym, keycode, e.keysym_num, e.state, e.char,}')
 
         def mouse_event_handler(**kwargs):
             event: tk.Event = kwargs.get(c.EVENT, None)
@@ -210,7 +213,7 @@ class MyTestCase(unittest.TestCase):
                         shape_selected.x += delta_x
                         shape_selected.y += delta_y
                         n_canvas.rectangle_interactor.draw(shape_selected)
-                    n_canvas.mouse_interactor.set_clicked_position(x,y)
+                    n_canvas.mouse_interactor.set_clicked_position(x, y)
 
         # [Canvas and Mouse actions]###########################################################
         mouse_handler = canvas.mouse_handler
@@ -301,6 +304,24 @@ class MyTestCase(unittest.TestCase):
         n_canvas.subscribe(c.SET_RECTANGLE_BORDER_WIDTH, lambda **data: set_border_width(canvas, **data))
 
         # [Define commands]###########################################################
+        def get_selected_rectangle():
+            selected_rectangle_ids = n_canvas.selection_interactor.get_shapes_selected()
+            if selected_rectangle_ids is not None and len(selected_rectangle_ids) > 0:
+                return n_canvas.rectangle_interactor.get_shape_by_id(selected_rectangle_ids[0])
+
+        def add_new_rectangle():
+            nonlocal rectangle_id
+            rectangle_id += 1
+            rectangle = n_canvas.rectangle_interactor.add_new_shape(id=f'rectangle_{rectangle_id}')
+            rectangle.set_position(10, 10)
+            rectangle.width = 100
+            rectangle.height = 25
+            rectangle.border_color = 'blue'
+            rectangle.border_width = 2
+            rectangle.fill_color = 'pink'
+
+            n_canvas.rectangle_interactor.draw(rectangle)
+            n_canvas.selection_interactor.select_shapes([rectangle.id])
 
         def change_canvas_color(c: tk.Canvas, color):
             c.configure(bg=color)
@@ -309,36 +330,49 @@ class MyTestCase(unittest.TestCase):
             c.config(highlightbackground=color)
 
         def move_and_draw(x: int, y: int):
-            rectangle.x += x
-            rectangle.y += y
-            n_canvas.rectangle_interactor.draw(rectangle)
+            rectangle = get_selected_rectangle()
+            if rectangle is not None:
+                rectangle.x += x
+                rectangle.y += y
+                n_canvas.rectangle_interactor.draw(rectangle)
 
         def add_width(width: int):
-            rectangle.width += width
-            n_canvas.rectangle_interactor.set_width(rectangle)
+            rectangle = get_selected_rectangle()
+            if rectangle is not None:
+                rectangle.width += width
+                n_canvas.rectangle_interactor.set_width(rectangle)
 
         def change_border_color(color: str):
-            rectangle.border_color = color
-            n_canvas.rectangle_interactor.set_border_color(rectangle)
+            rectangle = get_selected_rectangle()
+            if rectangle is not None:
+                rectangle.border_color = color
+                n_canvas.rectangle_interactor.set_border_color(rectangle)
 
         def fill_rectangle_with(color: str):
-            rectangle.fill_color = color
-            n_canvas.rectangle_interactor.set_fill_color(rectangle)
+            rectangle = get_selected_rectangle()
+            if rectangle is not None:
+                rectangle.fill_color = color
+                n_canvas.rectangle_interactor.set_fill_color(rectangle)
 
         def add_rectangle_border_width(width: int):
-            rectangle.border_width += width
-            n_canvas.rectangle_interactor.set_border_width(rectangle)
+            rectangle = get_selected_rectangle()
+            if rectangle is not None:
+                rectangle.border_width += width
+                n_canvas.rectangle_interactor.set_border_width(rectangle)
 
         # [Bind commands]###########################################################
+        rectangle_id = 0
         widgets.get('btn_01').configure(command=lambda: change_canvas_color(canvas, 'light yellow'))
         widgets.get('btn_02').configure(command=lambda: set_canvas_border_color(canvas, 'blue'))
         widgets.get('btn_03').configure(command=lambda: move_and_draw(10, 0))
         widgets.get('btn_04').configure(command=lambda: move_and_draw(0, 10))
         widgets.get('btn_05').configure(command=lambda: add_width(10))
         widgets.get('btn_06').configure(command=lambda: change_border_color('red'))
-        widgets.get('btn_07').configure(command=lambda: n_canvas.rectangle_interactor.draw(rectangle))
+        widgets.get('btn_07').configure(command=lambda: add_new_rectangle())
         widgets.get('btn_08').configure(command=lambda: fill_rectangle_with('yellow'))
         widgets.get('btn_09').configure(command=lambda: add_rectangle_border_width(1))
+        root.bind("<KeyPress>", lambda e: key_event_handler(e, c.KEY_PRESS))
+        root.bind("<KeyRelease>", lambda e: key_event_handler(e, c.KEY_RELEASE))
 
         # [Launch App]###########################################################
         root.mainloop()
