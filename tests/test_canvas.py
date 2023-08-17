@@ -113,25 +113,18 @@ class MyTestCase(unittest.TestCase):
 
         n_canvas.draw_rectangle(rectangle)
 
-        # [Define commands]###########################################################
-
+        # [Create Widget Dictionary]###########################################################
         import tkinter as tk
         from tkinter import ttk
 
-        def change_canvas_color(c: tk.Canvas, color):
-            c.configure(bg=color)
-
-        def set_canvas_border_color(c: tk.Canvas, color):
-            c.config(highlightbackground=color)
-
         buttons = {
             'btn_01': 'Canvas Color',
-            'btn_02': 'Draw Rect',
+            'btn_02': 'Canvas border color blue',
             'btn_03': 'Move Rect X and Draw',
             'btn_04': 'Move Rect Y and Draw',
             'btn_05': '+ Width',
             'btn_06': 'Border color red',
-            'btn_07': 'Canvas border color blue',
+            'btn_07': 'Draw Rect',
             'btn_08': 'Fill rectangle with yellow',
             'btn_09': '+ Border width',
         }
@@ -241,6 +234,13 @@ class MyTestCase(unittest.TestCase):
         n_canvas.subscribe(c.SET_RECTANGLE_BORDER_WIDTH, lambda **data: set_border_width(canvas, **data))
 
         # [Bind commands]###########################################################
+
+        def change_canvas_color(c: tk.Canvas, color):
+            c.configure(bg=color)
+
+        def set_canvas_border_color(c: tk.Canvas, color):
+            c.config(highlightbackground=color)
+
         def move_and_draw(x: int, y: int):
             rectangle.x += x
             rectangle.y += y
@@ -262,13 +262,14 @@ class MyTestCase(unittest.TestCase):
             rectangle.border_width += width
             n_canvas.set_rectangle_border_width(rectangle)
 
+        # [Bind commands]###########################################################
         widgets.get('btn_01').configure(command=lambda: change_canvas_color(canvas, 'light yellow'))
-        widgets.get('btn_02').configure(command=lambda: n_canvas.draw_rectangle(rectangle))
+        widgets.get('btn_02').configure(command=lambda: set_canvas_border_color(canvas, 'blue'))
         widgets.get('btn_03').configure(command=lambda: move_and_draw(10, 0))
         widgets.get('btn_04').configure(command=lambda: move_and_draw(0, 10))
         widgets.get('btn_05').configure(command=lambda: add_width(10))
         widgets.get('btn_06').configure(command=lambda: change_border_color('red'))
-        widgets.get('btn_07').configure(command=lambda: set_canvas_border_color(canvas, 'blue'))
+        widgets.get('btn_07').configure(command=lambda: n_canvas.draw_rectangle(rectangle))
         widgets.get('btn_08').configure(command=lambda: fill_rectangle_with('yellow'))
         widgets.get('btn_09').configure(command=lambda: add_rectangle_border_width(1))
 
