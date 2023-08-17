@@ -16,7 +16,7 @@ class Canvas(Entity):
 
     def __init__(self):
         super().__init__()
-        self._shapes: list[Union[IShape, Entity]] = []
+        self._shapes: dict[str, Union[IShape, Entity]] = {}
         self.backup()
         self._subscribers: dict[[str], list] = {}
         self._rectangle_interactor = RectangleInteractor(self.create_a_shape, self.get_any_shape_by_id, self._notify)
@@ -24,20 +24,18 @@ class Canvas(Entity):
         self._selection_interactor = SelectionInteractor(self.set, self.get)
 
     def undo(self):
-        for shape in self._shapes:
+        for shape in self._shapes.values():
             shape.undo()
         super().undo()
 
     def backup(self):
-        for shape in self._shapes:
+        for shape in self._shapes.values():
             shape.backup()
-        self.set(c.SHAPES, tuple(shape.state for shape in self._shapes))
+        self.set(c.SHAPES, tuple(s.state for s in self._shapes.values()))
         super().backup()
 
     def get_any_shape_by_id(self, shape_id: str) -> IShape:
-        for shape in self._shapes:
-            if shape.id == shape_id:
-                return shape
+        return self._shapes.get(shape_id, None)
 
     def add_text_box(self, **kwargs) -> TextBox:
         return self.create_a_shape(TextBox, **kwargs)
@@ -50,7 +48,7 @@ class Canvas(Entity):
 
     def create_a_shape(self, shape_class, **kwargs):
         new_shape = shape_class(**kwargs)
-        self._shapes.append(new_shape)
+        self._shapes[new_shape.id] = new_shape
         return new_shape
 
     def subscribe(self, key: str, subscriber):
