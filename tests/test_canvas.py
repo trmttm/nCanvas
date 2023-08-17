@@ -99,7 +99,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(text_box.font, 'Times New Roman')
         self.assertEqual(text_box.width, 10)
 
-    def atest_gui(self):
+    def test_gui(self):
         from n_canvas.interactors.canvas import Canvas
         n_canvas = Canvas()
 
@@ -169,16 +169,33 @@ class MyTestCase(unittest.TestCase):
                 shape_under_mouse = n_canvas.rectangle_interactor.get_shape_by_id(shape_id_under_mouse)
                 n_canvas.mouse_interactor.set_shape_under_mouse(shape_id_under_mouse)
 
-                shape_under_mouse.fill_color = 'yellow'
-                n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
+                if shape_id_under_mouse not in n_canvas.selection_interactor.get_shapes_selected():
+                    shape_under_mouse.fill_color = 'yellow'
+                    n_canvas.rectangle_interactor.set_fill_color(shape_under_mouse)
 
             elif event == c.Mouse_Motion_At and shape_id_under_mouse is None:
                 uncleared_shape_id = n_canvas.mouse_interactor.get_shape_under_mouse()
                 if uncleared_shape_id is not None:
                     n_canvas.mouse_interactor.clear_shape_under_mouse()
                     shape_to_clear = n_canvas.get_any_shape_by_id(uncleared_shape_id)
-                    shape_to_clear.fill_color = 'pink'
-                    n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
+
+                    if uncleared_shape_id not in n_canvas.selection_interactor.get_shapes_selected():
+                        shape_to_clear.fill_color = 'pink'
+                        n_canvas.rectangle_interactor.set_fill_color(shape_to_clear)
+
+            elif event == c.Left_Click:
+                if shape_id_under_mouse is not None:
+                    n_canvas.selection_interactor.select_shapes([shape_id_under_mouse])
+                    for shape_id in n_canvas.selection_interactor.get_shapes_selected():
+                        shape = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
+                        shape.fill_color = 'orange'
+                        n_canvas.rectangle_interactor.set_fill_color(shape)
+                else:
+                    for shape_id in n_canvas.selection_interactor.get_shapes_selected():
+                        shape = n_canvas.rectangle_interactor.get_shape_by_id(shape_id)
+                        shape.fill_color = 'pink'
+                        n_canvas.rectangle_interactor.set_fill_color(shape)
+                    n_canvas.selection_interactor.clear_shapes_selected()
 
         # [Canvas and Mouse actions]###########################################################
         mouse_handler = canvas.mouse_handler

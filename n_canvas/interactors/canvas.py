@@ -7,22 +7,9 @@ from n_canvas.interfaces import IShape
 from n_canvas.shapes.line import Line
 from n_canvas.shapes.text import Text
 from n_canvas.shapes.text_box import TextBox
+from .interactor_mouse import MouseInteractor
 from .interactor_rectangle import RectangleInteractor
-
-
-class MouseInteractor:
-    def __init__(self, set, get):
-        self._set = set
-        self._get = get
-
-    def set_shape_under_mouse(self, shape_id: str):
-        self._set(c.SHAPE_UNDER_MOUSE, shape_id)
-
-    def clear_shape_under_mouse(self):
-        self._set(c.SHAPE_UNDER_MOUSE, None)
-
-    def get_shape_under_mouse(self) -> str:
-        return self._get(c.SHAPE_UNDER_MOUSE)
+from .interactor_selection import SelectionInteractor
 
 
 class Canvas(Entity):
@@ -34,6 +21,7 @@ class Canvas(Entity):
         self._subscribers: dict[[str], list] = {}
         self._rectangle_interactor = RectangleInteractor(self.create_a_shape, self.get_any_shape_by_id, self._notify)
         self._mouse_interactor = MouseInteractor(self.set, self.get)
+        self._selection_interactor = SelectionInteractor(self.set, self.get)
 
     def undo(self):
         for shape in self._shapes:
@@ -76,6 +64,10 @@ class Canvas(Entity):
         if key in self._subscribers:
             for subscriber in self._subscribers.get(key):
                 subscriber(**kwargs)
+
+    @property
+    def selection_interactor(self) -> SelectionInteractor:
+        return self._selection_interactor
 
     @property
     def mouse_interactor(self) -> MouseInteractor:

@@ -1,16 +1,4 @@
 from n_canvas import constants as c
-from n_canvas import constants as c
-from n_canvas import constants as c
-from n_canvas import constants as c
-from n_canvas import constants as c
-from n_canvas import constants as c
-from n_canvas.shapes.rectangle import Rectangle
-from n_canvas.shapes.rectangle import Rectangle
-from n_canvas.shapes.rectangle import Rectangle
-from n_canvas.shapes.rectangle import Rectangle
-from n_canvas.shapes.rectangle import Rectangle
-from n_canvas.shapes.rectangle import Rectangle
-from n_canvas.shapes.rectangle import Rectangle
 from n_canvas.shapes.rectangle import Rectangle
 
 
