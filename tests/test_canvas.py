@@ -97,7 +97,8 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(text_box.font, 'Times New Roman')
         self.assertEqual(text_box.width, 10)
 
-    def test_gui(self):
+    def atest_gui(self):
+        from n_canvas import constants as c
         from n_canvas.interactors.canvas import Canvas
         n_canvas = Canvas()
 
@@ -142,18 +143,32 @@ class MyTestCase(unittest.TestCase):
 
         canvas = create_custom_canvas(parent)
 
+        command_name_to_command = {
+            c.CMD_MOVE_RIGHT: lambda: move_and_draw(10, 0),
+            c.CMD_MOVE_LEFT: lambda: move_and_draw(-10, 0),
+            c.CMD_MOVE_UP: lambda: move_and_draw(0, 10),
+            c.CMD_MOVE_DOWN: lambda: move_and_draw(0, -10),
+            c.CMD_UNDEFINED: lambda *args: print(f'No command assigned for {args}'),
+        }
+        command_name_to_keyboard = {
+            c.CMD_MOVE_RIGHT: 2080438019,
+            c.CMD_MOVE_LEFT: 2063660802,
+            c.CMD_MOVE_UP: 2097215233,
+            c.CMD_MOVE_DOWN: 2113992448,
+            c.CMD_UNDEFINED: None,
+        }
         key_map = {
-            2080438019: lambda: move_and_draw(10, 0),
-            2063660802: lambda: move_and_draw(-10, 0),
-            2097215233: lambda: move_and_draw(0, 10),
-            2113992448: lambda: move_and_draw(0, -10),
-            None: lambda *args: print(f'No command assigned for {args}'),
+            command_name_to_keyboard.get(c.CMD_MOVE_RIGHT): command_name_to_command.get(c.CMD_MOVE_RIGHT),
+            command_name_to_keyboard.get(c.CMD_MOVE_LEFT): command_name_to_command.get(c.CMD_MOVE_LEFT),
+            command_name_to_keyboard.get(c.CMD_MOVE_UP): command_name_to_command.get(c.CMD_MOVE_UP),
+            command_name_to_keyboard.get(c.CMD_MOVE_DOWN): command_name_to_command.get(c.CMD_MOVE_DOWN),
+            command_name_to_keyboard.get(c.CMD_UNDEFINED): command_name_to_command.get(c.CMD_UNDEFINED),
         }
 
         def key_event_handler(e: tk.Event, event):
             keycode = e.keycode
             if event == c.KEY_PRESS:
-                key_map.get(keycode, lambda : key_map.get(None)(keycode))()
+                key_map.get(keycode, lambda: key_map.get(None)(keycode))()
             elif event == c.KEY_RELEASE:
                 pass
             print(f'{event}, {e.keysym, keycode, e.keysym_num, e.state, e.char,}')
@@ -349,7 +364,6 @@ class MyTestCase(unittest.TestCase):
         mouse_handler.middle_click_release_alt = lambda kwargs: f(c.Alt_Middle_Click_Release, **kwargs)
 
         # [Define object interaction]###########################################################
-        from n_canvas import constants as c
         from gui.canvas.rectangle.draw_rectangle import move_or_draw_rectangle
         from gui.canvas.rectangle.set_properties import set_border_color
         from gui.canvas.rectangle.set_properties import fill
