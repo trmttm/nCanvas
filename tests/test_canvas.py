@@ -97,7 +97,7 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(text_box.font, 'Times New Roman')
         self.assertEqual(text_box.width, 10)
 
-    def atest_gui(self):
+    def test_gui(self):
         from n_canvas.interactors.canvas import Canvas
         n_canvas = Canvas()
 
@@ -147,12 +147,13 @@ class MyTestCase(unittest.TestCase):
             2063660802: lambda: move_and_draw(-10, 0),
             2097215233: lambda: move_and_draw(0, 10),
             2113992448: lambda: move_and_draw(0, -10),
+            None: lambda *args: print(f'No command assigned for {args}'),
         }
 
         def key_event_handler(e: tk.Event, event):
             keycode = e.keycode
             if event == c.KEY_PRESS:
-                key_map.get(keycode, lambda: print(f'No command assigned for {keycode}'))()
+                key_map.get(keycode, lambda : key_map.get(None)(keycode))()
             elif event == c.KEY_RELEASE:
                 pass
             print(f'{event}, {e.keysym, keycode, e.keysym_num, e.state, e.char,}')
